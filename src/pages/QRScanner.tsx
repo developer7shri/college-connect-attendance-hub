@@ -4,12 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 const QRScanner: React.FC = () => {
   const [scanning, setScanning] = useState<boolean>(false);
   const [scanned, setScanned] = useState<boolean>(false);
   const [scanResult, setScanResult] = useState<any>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // This would use a real QR scanner library in production
   const startScanning = () => {
@@ -21,6 +23,7 @@ const QRScanner: React.FC = () => {
       const mockResult = {
         subjectId: "1",
         subjectCode: "CS301",
+        subjectName: "Data Structures",
         teacherId: "3",
         timestamp: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
@@ -38,13 +41,17 @@ const QRScanner: React.FC = () => {
     
     // Simulate API call to mark attendance
     setTimeout(() => {
-      toast.success("Attendance marked successfully for Data Structures (CS301)");
+      toast.success(`Attendance marked successfully for ${data.subjectName} (${data.subjectCode})`);
     }, 1000);
   };
 
   const resetScanner = () => {
     setScanned(false);
     setScanResult(null);
+  };
+
+  const goToDashboard = () => {
+    navigate("/student/dashboard");
   };
 
   return (
@@ -85,7 +92,7 @@ const QRScanner: React.FC = () => {
                   </svg>
                   <h3 className="text-lg md:text-xl font-semibold mt-2">Success!</h3>
                   <p className="text-sm mt-1">Your attendance has been recorded</p>
-                  <p className="text-sm mt-1 font-medium">Data Structures (CS301)</p>
+                  <p className="text-sm mt-1 font-medium">{scanResult.subjectName} ({scanResult.subjectCode})</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {new Date().toLocaleTimeString()} • {new Date().toLocaleDateString()}
                   </p>
@@ -115,26 +122,33 @@ const QRScanner: React.FC = () => {
             )}
           </div>
           
-          {!scanned ? (
-            <Button
-              onClick={startScanning}
-              disabled={scanning}
-              className="w-full bg-scahts-700 hover:bg-scahts-800 py-2.5"
-            >
-              {scanning ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></div>
-                  Scanning...
-                </div>
-              ) : (
-                "Scan QR Code"
-              )}
-            </Button>
-          ) : (
-            <Button onClick={resetScanner} variant="outline" className="w-full py-2.5">
-              Scan Another QR Code
-            </Button>
-          )}
+          <div className="flex flex-col space-y-2">
+            {!scanned ? (
+              <Button
+                onClick={startScanning}
+                disabled={scanning}
+                className="w-full bg-scahts-700 hover:bg-scahts-800 py-2.5"
+              >
+                {scanning ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></div>
+                    Scanning...
+                  </div>
+                ) : (
+                  "Scan QR Code"
+                )}
+              </Button>
+            ) : (
+              <>
+                <Button onClick={resetScanner} variant="outline" className="w-full py-2.5">
+                  Scan Another QR Code
+                </Button>
+                <Button onClick={goToDashboard} className="w-full py-2.5 bg-scahts-700 hover:bg-scahts-800">
+                  Return to Dashboard
+                </Button>
+              </>
+            )}
+          </div>
           
           <p className="text-xs text-center text-muted-foreground">
             Make sure the QR code is clearly visible and within the frame

@@ -37,28 +37,28 @@ const navItems: NavItem[] = [
     href: "/departments",
     icon: BookOpen,
     roles: ["admin"],
-    implemented: false,
+    implemented: true,
   },
   {
     label: "Teachers",
     href: "/teachers",
     icon: Users,
     roles: ["admin", "hod"],
-    implemented: false,
+    implemented: true,
   },
   {
     label: "Students",
     href: "/students",
     icon: Users,
     roles: ["admin", "hod", "teacher"],
-    implemented: false,
+    implemented: true,
   },
   {
     label: "Attendance",
     href: "/attendance",
     icon: CheckSquare,
     roles: ["admin", "hod", "teacher", "student"],
-    implemented: false,
+    implemented: true,
   },
   {
     label: "QR Scanner",
@@ -79,28 +79,28 @@ const navItems: NavItem[] = [
     href: "/mentoring",
     icon: User,
     roles: ["hod", "teacher", "student"],
-    implemented: false,
+    implemented: true,
   },
   {
     label: "Leave Management",
     href: "/leave",
     icon: Calendar,
     roles: ["hod", "teacher", "student"],
-    implemented: false,
+    implemented: true,
   },
   {
     label: "Reports",
     href: "/reports",
     icon: FileText,
     roles: ["admin", "hod", "teacher"],
-    implemented: false,
+    implemented: true,
   },
   {
     label: "Settings",
     href: "/settings",
     icon: Settings,
     roles: ["admin", "hod", "teacher", "student"],
-    implemented: false,
+    implemented: true,
   },
 ];
 
@@ -114,9 +114,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigation }) => {
 
   if (!user) return null;
 
-  // Filter navigation items based on user role and implementation status
+  // Filter navigation items based on user role - now showing all items 
+  // regardless of implementation status
   const filteredNavItems = navItems.filter((item) => 
-    item.roles.includes(user.role) && item.implemented === true
+    item.roles.includes(user.role)
   );
 
   // Get the base route for the current user role
@@ -135,6 +136,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigation }) => {
     if (item.label === "Dashboard") {
       return `${getRoleBasePath()}/dashboard`;
     }
+    
+    // For other items, prepend the role-specific path if the href doesn't already contain it
+    if (!item.href.startsWith(getRoleBasePath()) && 
+        !item.href.includes('/qr-scanner') && 
+        !item.href.includes('/qr-generator')) {
+      return `${getRoleBasePath()}${item.href}`;
+    }
+    
     return item.href;
   };
 

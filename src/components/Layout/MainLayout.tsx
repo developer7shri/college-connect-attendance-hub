@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { UserRole } from "@/types";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
@@ -23,6 +23,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ allowedRoles }) => {
   const { isAuthenticated, isLoading, user } = authState;
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const location = useLocation();
 
   if (isLoading) {
     return <div className="flex h-screen items-center justify-center">
@@ -40,16 +41,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ allowedRoles }) => {
     
     switch (user.role) {
       case "admin":
-        redirectPath = "/admin";
+        redirectPath = "/admin/dashboard";
         break;
       case "hod":
-        redirectPath = "/hod";
+        redirectPath = "/hod/dashboard";
         break;
       case "teacher":
-        redirectPath = "/teacher";
+        redirectPath = "/teacher/dashboard";
         break;
       case "student":
-        redirectPath = "/student";
+        redirectPath = "/student/dashboard";
         break;
     }
     
@@ -78,7 +79,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ allowedRoles }) => {
         ) : (
           <Sidebar />
         )}
-        <main className="flex-1 p-4 md:p-6 w-full">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
           <Outlet />
         </main>
       </div>
