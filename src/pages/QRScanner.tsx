@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const QRScanner: React.FC = () => {
   const [scanning, setScanning] = useState<boolean>(false);
   const [scanned, setScanned] = useState<boolean>(false);
   const [scanResult, setScanResult] = useState<any>(null);
+  const isMobile = useIsMobile();
 
   // This would use a real QR scanner library in production
   const startScanning = () => {
@@ -46,30 +48,30 @@ const QRScanner: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Scan Attendance QR Code</h1>
+    <div className="w-full mx-auto py-4 md:py-8 px-2 md:px-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Scan Attendance QR Code</h1>
       
       <Card className="max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle>Attendance QR Scanner</CardTitle>
-          <CardDescription>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl md:text-2xl">Attendance QR Scanner</CardTitle>
+          <CardDescription className="text-sm">
             Scan the QR code displayed by your teacher to mark your attendance
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6">
           <div className="border rounded-lg overflow-hidden aspect-square relative">
             {scanning && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                <div className="animate-ping absolute h-16 w-16 rounded-full bg-scahts-600 opacity-75"></div>
-                <div className="relative h-16 w-16 rounded-full bg-scahts-500"></div>
+                <div className="animate-ping absolute h-12 w-12 md:h-16 md:w-16 rounded-full bg-scahts-600 opacity-75"></div>
+                <div className="relative h-12 w-12 md:h-16 md:w-16 rounded-full bg-scahts-500"></div>
               </div>
             )}
             
             {scanned && scanResult && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/5 p-4">
-                <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/5 p-2 md:p-4">
+                <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg text-center">
                   <svg
-                    className="h-16 w-16 text-green-500 mx-auto"
+                    className="h-12 w-12 md:h-16 md:w-16 text-green-500 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -81,7 +83,7 @@ const QRScanner: React.FC = () => {
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  <h3 className="text-xl font-semibold mt-2">Success!</h3>
+                  <h3 className="text-lg md:text-xl font-semibold mt-2">Success!</h3>
                   <p className="text-sm mt-1">Your attendance has been recorded</p>
                   <p className="text-sm mt-1 font-medium">Data Structures (CS301)</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -94,7 +96,7 @@ const QRScanner: React.FC = () => {
             {!scanning && !scanned && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100">
                 <svg
-                  className="h-16 w-16 text-gray-400"
+                  className="h-12 w-12 md:h-16 md:w-16 text-gray-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -106,7 +108,7 @@ const QRScanner: React.FC = () => {
                     d="M12 4v1m6 11h2m-2 0h-2m0 0V4m0 12v4M4 12h14M4 12c0-1.657 1.343-3 3-3s3 1.343 3 3-1.343 3-3 3-3-1.343-3-3z"
                   />
                 </svg>
-                <p className="text-center text-sm text-muted-foreground mt-4">
+                <p className="text-center text-sm text-muted-foreground mt-4 px-2">
                   Press the button below to start scanning
                 </p>
               </div>
@@ -117,10 +119,10 @@ const QRScanner: React.FC = () => {
             <Button
               onClick={startScanning}
               disabled={scanning}
-              className="w-full bg-scahts-700 hover:bg-scahts-800"
+              className="w-full bg-scahts-700 hover:bg-scahts-800 py-2.5"
             >
               {scanning ? (
-                <div className="flex items-center">
+                <div className="flex items-center justify-center">
                   <div className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></div>
                   Scanning...
                 </div>
@@ -129,7 +131,7 @@ const QRScanner: React.FC = () => {
               )}
             </Button>
           ) : (
-            <Button onClick={resetScanner} variant="outline" className="w-full">
+            <Button onClick={resetScanner} variant="outline" className="w-full py-2.5">
               Scan Another QR Code
             </Button>
           )}

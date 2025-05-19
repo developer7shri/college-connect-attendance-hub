@@ -12,11 +12,13 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, LogOut, Settings, User } from "lucide-react";
+import { Bell, LogOut, Settings, User, Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const TopBar: React.FC = () => {
   const { authState, logout } = useAuth();
   const { user } = authState;
+  const isMobile = useIsMobile();
 
   const handleLogout = () => {
     logout();
@@ -31,27 +33,32 @@ const TopBar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between bg-white shadow-sm h-16 px-6">
+    <header className="sticky top-0 z-30 flex items-center justify-between bg-white shadow-sm h-14 md:h-16 px-3 md:px-6">
       <div className="flex items-center gap-2">
         <Link to="/" className="flex items-center gap-2">
-          <div className="bg-scahts-700 text-white font-bold p-2 rounded">
+          <div className="bg-scahts-700 text-white font-bold p-1.5 md:p-2 rounded">
             SCAHTS
           </div>
-          <span className="text-lg font-semibold hidden md:inline-block">
+          <span className="text-base md:text-lg font-semibold hidden md:inline-block">
             College Attendance System
           </span>
+          {isMobile && (
+            <span className="text-sm font-semibold">
+              Attendance
+            </span>
+          )}
         </Link>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon">
-          <Bell size={18} />
+      <div className="flex items-center gap-2 md:gap-4">
+        <Button variant="outline" size="icon" className="h-8 w-8 md:h-9 md:w-9">
+          <Bell size={isMobile ? 16 : 18} />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-              <Avatar>
+            <Button variant="ghost" className="relative h-8 w-8 md:h-9 md:w-9 rounded-full">
+              <Avatar className="h-8 w-8 md:h-9 md:w-9">
                 <AvatarImage src={user?.profileImageUrl} alt={user?.name} />
                 <AvatarFallback>{user?.name ? getInitials(user.name) : "U"}</AvatarFallback>
               </Avatar>

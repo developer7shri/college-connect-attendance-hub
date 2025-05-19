@@ -104,7 +104,11 @@ const navItems: NavItem[] = [
   },
 ];
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onNavigation?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onNavigation }) => {
   const { authState } = useAuth();
   const { user } = authState;
 
@@ -134,16 +138,23 @@ const Sidebar: React.FC = () => {
     return item.href;
   };
 
+  const handleNavClick = () => {
+    if (onNavigation) {
+      onNavigation();
+    }
+  };
+
   return (
-    <aside className="w-64 min-h-[calc(100vh-4rem)] bg-white border-r border-border">
+    <aside className="w-64 h-full bg-white border-r border-border">
       <nav className="p-4 space-y-1">
         {filteredNavItems.map((item) => (
           <NavLink
             key={item.href}
             to={getCorrectPath(item)}
+            onClick={handleNavClick}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
+                "flex items-center gap-3 px-3 py-3 rounded-md transition-colors",
                 isActive
                   ? "bg-scahts-50 text-scahts-700 font-medium"
                   : "text-gray-600 hover:bg-gray-100"
@@ -151,7 +162,7 @@ const Sidebar: React.FC = () => {
             }
           >
             <item.icon size={18} />
-            <span>{item.label}</span>
+            <span className="text-base">{item.label}</span>
           </NavLink>
         ))}
       </nav>
