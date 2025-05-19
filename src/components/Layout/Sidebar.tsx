@@ -21,7 +21,7 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   roles: UserRole[];
-  implemented?: boolean;  // New flag to mark implemented routes
+  implemented?: boolean;  // Flag to mark implemented routes
 }
 
 const navItems: NavItem[] = [
