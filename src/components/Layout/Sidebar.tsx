@@ -14,6 +14,7 @@ import {
   Home,
   QrCode,
   FileText,
+  UserCircle
 } from "lucide-react";
 
 interface NavItem {
@@ -92,6 +93,13 @@ const navItems: NavItem[] = [
     label: "Reports",
     href: "/reports",
     icon: FileText,
+    roles: ["admin", "hod", "teacher", "student"],
+    implemented: true,
+  },
+  {
+    label: "Profile",
+    href: "/profile",
+    icon: UserCircle,
     roles: ["admin", "hod", "teacher", "student"],
     implemented: true,
   },

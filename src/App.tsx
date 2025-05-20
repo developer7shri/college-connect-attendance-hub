@@ -34,6 +34,11 @@ import LeaveManagement from "@/pages/leave/LeaveManagement";
 // Reports
 import StudentReports from "@/pages/reports/StudentReports";
 
+// New Pages
+import Settings from "@/pages/Settings";
+import Profile from "@/pages/Profile";
+import Students from "@/pages/Students";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -57,6 +62,9 @@ const App = () => (
               <Route path="attendance" element={<TeacherAttendance />} />
               <Route path="leave" element={<LeaveManagement />} />
               <Route path="reports" element={<StudentReports />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="students" element={<Students />} />
               {/* Add more admin routes here */}
             </Route>
             
@@ -68,6 +76,9 @@ const App = () => (
               <Route path="attendance" element={<TeacherAttendance />} />
               <Route path="leave" element={<LeaveManagement />} />
               <Route path="reports" element={<StudentReports />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="students" element={<Students />} />
               {/* Add more HOD routes here */}
             </Route>
             
@@ -80,7 +91,9 @@ const App = () => (
               <Route path="attendance" element={<TeacherAttendance />} />
               <Route path="leave" element={<LeaveManagement />} />
               <Route path="reports" element={<StudentReports />} />
-              <Route path="students" element={<NotFound />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="students" element={<Students />} />
               {/* Add more teacher routes here */}
             </Route>
             
@@ -93,6 +106,8 @@ const App = () => (
               <Route path="attendance" element={<StudentAttendance />} />
               <Route path="reports" element={<StudentReports />} />
               <Route path="leave" element={<LeaveManagement />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="profile" element={<Profile />} />
               {/* Add more student routes here */}
             </Route>
             
