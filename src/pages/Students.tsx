@@ -26,6 +26,8 @@ import {
   Trash
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Student } from "@/types";
 
 const Students = () => {
@@ -34,9 +36,20 @@ const Students = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [selectedSemester, setSelectedSemester] = useState<string>("all");
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+
+  // Form state for new student
+  const [newStudent, setNewStudent] = useState({
+    name: "",
+    usn: "",
+    email: "",
+    department: "Computer Science",
+    semester: "3",
+    phone: "",
+  });
 
   // Mock student data
-  const mockStudents: Student[] = [
+  const [students, setStudents] = useState<Student[]>([
     {
       id: "1",
       name: "Rahul Sharma",
@@ -91,16 +104,16 @@ const Students = () => {
       semester: 5,
       mentorId: "3"
     }
-  ];
+  ]);
 
   // Get distinct departments
-  const departments = [...new Set(mockStudents.map(s => s.department))];
+  const departments = [...new Set(students.map(s => s.department))];
   
   // Get all semesters
   const semesters = [...Array(8)].map((_, i) => i + 1);
 
   // Filter students based on search and filters
-  const filteredStudents = mockStudents.filter(student => {
+  const filteredStudents = students.filter(student => {
     const matchesSearch = 
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.usn.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,6 +138,56 @@ const Students = () => {
       .toUpperCase();
   };
 
+  // Handle input change for new student form
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewStudent(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle select change for new student form
+  const handleSelectChange = (name: string, value: string) => {
+    setNewStudent(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle form submission for adding new student
+  const handleAddStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Form validation
+    if (!newStudent.name || !newStudent.usn || !newStudent.email) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    // Create new student object
+    const studentToAdd: Student = {
+      id: (students.length + 1).toString(),
+      name: newStudent.name,
+      usn: newStudent.usn,
+      email: newStudent.email,
+      department: newStudent.department,
+      semester: parseInt(newStudent.semester),
+      mentorId: "3" // Default mentor ID
+    };
+
+    // Add student to list
+    setStudents([...students, studentToAdd]);
+    
+    // Show success message
+    toast.success("Student added successfully");
+    
+    // Reset form and close dialog
+    setNewStudent({
+      name: "",
+      usn: "",
+      email: "",
+      department: "Computer Science",
+      semester: "3",
+      phone: "",
+    });
+    setIsAddStudentOpen(false);
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -134,13 +197,119 @@ const Students = () => {
             Manage and view student information.
           </p>
         </div>
-        <Button 
-          className="mt-4 md:mt-0"
-          onClick={() => toast.info("Add student feature coming soon")}
-        >
-          <UserPlus className="mr-2 h-4 w-4" />
-          Add Student
-        </Button>
+        
+        <Dialog open={isAddStudentOpen} onOpenChange={setIsAddStudentOpen}>
+          <DialogTrigger asChild>
+            <Button className="mt-4 md:mt-0">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add Student
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add New Student</DialogTitle>
+            </DialogHeader>
+            
+            <form onSubmit={handleAddStudent} className="space-y-4">
+              <div className="grid gap-4">
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="col-span-4">
+                    <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
+                    <Input 
+                      id="name" 
+                      name="name"
+                      placeholder="Enter student name" 
+                      value={newStudent.name}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="col-span-4 md:col-span-2">
+                    <Label htmlFor="usn">USN <span className="text-red-500">*</span></Label>
+                    <Input 
+                      id="usn" 
+                      name="usn"
+                      placeholder="Enter USN" 
+                      value={newStudent.usn}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-4 md:col-span-2">
+                    <Label htmlFor="semester">Semester</Label>
+                    <Select 
+                      value={newStudent.semester}
+                      onValueChange={(value) => handleSelectChange("semester", value)}
+                    >
+                      <SelectTrigger id="semester">
+                        <SelectValue placeholder="Select semester" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {semesters.map(sem => (
+                          <SelectItem key={sem} value={sem.toString()}>Semester {sem}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="col-span-4">
+                    <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+                    <Input 
+                      id="email" 
+                      name="email"
+                      type="email" 
+                      placeholder="Enter email address" 
+                      value={newStudent.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="col-span-4 md:col-span-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input 
+                      id="phone" 
+                      name="phone"
+                      placeholder="Enter phone number" 
+                      value={newStudent.phone}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="col-span-4 md:col-span-2">
+                    <Label htmlFor="department">Department</Label>
+                    <Select 
+                      value={newStudent.department}
+                      onValueChange={(value) => handleSelectChange("department", value)}
+                    >
+                      <SelectTrigger id="department">
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map(dept => (
+                          <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter className="mt-6">
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button type="submit">Add Student</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card className="mb-6">

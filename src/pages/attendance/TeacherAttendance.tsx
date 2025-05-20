@@ -9,6 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, XCircle, Search, FileDown, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const TeacherAttendance: React.FC = () => {
   const { toast } = useToast();
@@ -48,6 +49,30 @@ const TeacherAttendance: React.FC = () => {
     student.usn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Generate mock attendance data with more details
+  const generateAttendanceData = () => {
+    return students.map(student => {
+      const attended = Math.floor(Math.random() * 10) + 15; // Random between 15-24
+      const total = 24;
+      const percentage = Math.round((attended / total) * 100);
+      
+      return {
+        ...student,
+        attended,
+        total,
+        percentage
+      };
+    });
+  };
+  
+  const studentAttendance = generateAttendanceData();
+  
+  // Identify students below 75% attendance
+  const lowAttendanceStudents = studentAttendance.filter(student => student.percentage < 75);
+  
+  // Identify students with perfect attendance
+  const perfectAttendanceStudents = studentAttendance.filter(student => student.percentage === 100);
+
   const togglePresence = (studentId: string) => {
     // In a real app, this would update the state
     toast({
@@ -75,6 +100,14 @@ const TeacherAttendance: React.FC = () => {
       title: "Downloading Report",
       description: "Your attendance report is being downloaded",
     });
+  };
+  
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
   return (
@@ -321,25 +354,19 @@ const TeacherAttendance: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {students.map((student) => {
-                      const attended = Math.floor(Math.random() * 10) + 15; // Random between 15-24
-                      const total = 24;
-                      const percentage = Math.round((attended / total) * 100);
-                      
-                      return (
-                        <tr key={student.id} className="border-b">
-                          <td className="py-3 px-4">{student.usn}</td>
-                          <td className="py-3 px-4">{student.name}</td>
-                          <td className="py-3 px-4 text-center">{attended}</td>
-                          <td className="py-3 px-4 text-center">{total}</td>
-                          <td className={`py-3 px-4 text-center font-medium ${
-                            percentage >= 75 ? "text-green-600" : "text-red-600"
-                          }`}>
-                            {percentage}%
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {studentAttendance.map((student) => (
+                      <tr key={student.id} className="border-b">
+                        <td className="py-3 px-4">{student.usn}</td>
+                        <td className="py-3 px-4">{student.name}</td>
+                        <td className="py-3 px-4 text-center">{student.attended}</td>
+                        <td className="py-3 px-4 text-center">{student.total}</td>
+                        <td className={`py-3 px-4 text-center font-medium ${
+                          student.percentage >= 75 ? "text-green-600" : "text-red-600"
+                        }`}>
+                          {student.percentage}%
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -367,16 +394,68 @@ const TeacherAttendance: React.FC = () => {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardDescription>Below 75%</CardDescription>
-                    <CardTitle className="text-3xl">3 Students</CardTitle>
+                    <CardTitle className="text-3xl">{lowAttendanceStudents.length} Students</CardTitle>
                   </CardHeader>
                 </Card>
                 
                 <Card>
                   <CardHeader className="pb-2">
                     <CardDescription>Perfect Attendance</CardDescription>
-                    <CardTitle className="text-3xl">5 Students</CardTitle>
+                    <CardTitle className="text-3xl">{perfectAttendanceStudents.length} Students</CardTitle>
                   </CardHeader>
                 </Card>
+              </div>
+              
+              {/* Students below 75% attendance */}
+              <div className="space-y-4 mb-6">
+                <h3 className="font-medium">Students Below 75% Attendance</h3>
+                
+                {lowAttendanceStudents.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {lowAttendanceStudents.map(student => (
+                      <div key={student.id} className="flex items-center gap-3 p-3 border rounded-md">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-red-100 text-red-800">{getInitials(student.name)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{student.name}</p>
+                          <p className="text-sm text-muted-foreground">{student.usn}</p>
+                        </div>
+                        <div className="ml-auto font-medium text-red-600">
+                          {student.percentage}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No students below 75% attendance.</p>
+                )}
+              </div>
+              
+              {/* Students with perfect attendance */}
+              <div className="space-y-4 mb-6">
+                <h3 className="font-medium">Students with Perfect Attendance</h3>
+                
+                {perfectAttendanceStudents.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {perfectAttendanceStudents.map(student => (
+                      <div key={student.id} className="flex items-center gap-3 p-3 border rounded-md">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-green-100 text-green-800">{getInitials(student.name)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{student.name}</p>
+                          <p className="text-sm text-muted-foreground">{student.usn}</p>
+                        </div>
+                        <div className="ml-auto font-medium text-green-600">
+                          100%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No students with perfect attendance.</p>
+                )}
               </div>
               
               <div className="space-y-4">
