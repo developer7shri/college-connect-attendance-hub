@@ -2,95 +2,214 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileDown, Download } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Sample data for the reports
+const attendanceData = [
+  { subject: "Mathematics", present: 42, absent: 4, total: 46 },
+  { subject: "Physics", present: 38, absent: 8, total: 46 },
+  { subject: "Chemistry", present: 40, absent: 6, total: 46 },
+  { subject: "Computer Science", present: 44, absent: 2, total: 46 },
+  { subject: "English", present: 39, absent: 7, total: 46 },
+];
+
+const performanceData = [
+  { subject: "Mathematics", marks: 85, classAvg: 76 },
+  { subject: "Physics", marks: 78, classAvg: 72 },
+  { subject: "Chemistry", marks: 72, classAvg: 68 },
+  { subject: "Computer Science", marks: 92, classAvg: 80 },
+  { subject: "English", marks: 88, classAvg: 78 },
+];
+
+const progressData = [
+  { month: "Jan", marks: 72 },
+  { month: "Feb", marks: 76 },
+  { month: "Mar", marks: 78 },
+  { month: "Apr", marks: 75 },
+  { month: "May", marks: 82 },
+  { month: "Jun", marks: 87 },
+  { month: "Jul", marks: 90 },
+];
 
 const StudentReports: React.FC = () => {
-  const { toast } = useToast();
-  const [selectedSemester, setSelectedSemester] = useState("current");
+  const { authState } = useAuth();
+  const [activeTab, setActiveTab] = useState("attendance");
   
-  // Mock data for reports
-  const attendanceData = [
-    { subject: "Data Structures", attendance: 85 },
-    { subject: "Database Systems", attendance: 78 },
-    { subject: "Computer Networks", attendance: 92 },
-    { subject: "Web Development", attendance: 88 },
-    { subject: "Operating Systems", attendance: 75 },
-    { subject: "Software Engineering", attendance: 82 },
-  ];
+  // Calculate attendance percentages
+  const totalClasses = attendanceData.reduce((sum, subject) => sum + subject.total, 0);
+  const totalPresent = attendanceData.reduce((sum, subject) => sum + subject.present, 0);
+  const attendancePercentage = Math.round((totalPresent / totalClasses) * 100);
   
-  const performanceData = [
-    { subject: "Data Structures", internal: 45, external: 38, max: 50 },
-    { subject: "Database Systems", internal: 42, external: 35, max: 50 },
-    { subject: "Computer Networks", internal: 47, external: 40, max: 50 },
-    { subject: "Web Development", internal: 44, external: 42, max: 50 },
-    { subject: "Operating Systems", internal: 40, external: 36, max: 50 },
-    { subject: "Software Engineering", internal: 43, external: 39, max: 50 },
-  ];
-  
-  const semesterData = {
-    credits: 24,
-    sgpa: 8.7,
-    cgpa: 8.5,
-    rank: 5,
-    classStrength: 60,
-  };
-
-  const downloadReport = (reportType: string) => {
-    toast({
-      title: "Downloading Report",
-      description: `Your ${reportType} report is being downloaded`,
-    });
-  };
+  // Calculate average performance
+  const totalMarks = performanceData.reduce((sum, subject) => sum + subject.marks, 0);
+  const averageMarks = Math.round(totalMarks / performanceData.length);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Academic Reports</h1>
+        <h1 className="text-3xl font-bold">Student Reports</h1>
         <p className="text-muted-foreground">
-          View your academic reports and performance metrics
+          View your academic performance and attendance records
         </p>
       </div>
 
-      <div className="flex justify-between items-center">
-        <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Semester" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="current">Current Semester</SelectItem>
-            <SelectItem value="sem3">Semester 3</SelectItem>
-            <SelectItem value="sem2">Semester 2</SelectItem>
-            <SelectItem value="sem1">Semester 1</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Button variant="outline" onClick={() => downloadReport("consolidated")}>
-          <Download className="mr-2 h-4 w-4" />
-          Download All Reports
-        </Button>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Overall Attendance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold">{attendancePercentage}%</div>
+              <div className={`rounded-full px-2 py-1 text-xs ${
+                attendancePercentage >= 75 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}>
+                {attendancePercentage >= 75 ? "Good Standing" : "Attention Required"}
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalPresent} present out of {totalClasses} total classes
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Average Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{averageMarks}/100</div>
+            <div className="mt-1 flex items-center text-xs text-muted-foreground">
+              <div className={`rounded-full px-2 py-1 ${
+                averageMarks >= 60 ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
+              }`}>
+                {averageMarks >= 80 ? "Excellent" : 
+                 averageMarks >= 70 ? "Very Good" : 
+                 averageMarks >= 60 ? "Good" : 
+                 averageMarks >= 50 ? "Average" : "Needs Improvement"}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Progress Trend</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[80px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={progressData}>
+                  <Line 
+                    type="monotone" 
+                    dataKey="marks" 
+                    stroke="#6366f1" 
+                    strokeWidth={2} 
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Tabs defaultValue="marks">
+      <Tabs defaultValue="attendance" value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="marks">Marks</TabsTrigger>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          <TabsTrigger value="semester">Semester Report</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="progress">Progress</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="marks" className="space-y-4 mt-4">
+        
+        <TabsContent value="attendance" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Academic Performance</CardTitle>
+              <CardTitle>Subject-wise Attendance</CardTitle>
               <CardDescription>
-                Your internal and external assessment marks for {selectedSemester === "current" ? "the current semester" : `semester ${selectedSemester.replace("sem", "")}`}
+                Your attendance record for each subject this semester
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={attendanceData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="subject" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar 
+                      dataKey="present" 
+                      name="Present" 
+                      stackId="a" 
+                      fill="#10b981" 
+                    />
+                    <Bar 
+                      dataKey="absent" 
+                      name="Absent" 
+                      stackId="a" 
+                      fill="#ef4444" 
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              
+              <div className="mt-6 space-y-4">
+                {attendanceData.map((subject) => (
+                  <div key={subject.subject} className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{subject.subject}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {subject.present} of {subject.total} classes attended
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${
+                            (subject.present / subject.total) * 100 >= 75 
+                              ? "bg-green-500" 
+                              : "bg-red-500"
+                          }`}
+                          style={{ width: `${(subject.present / subject.total) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium">
+                        {Math.round((subject.present / subject.total) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="performance" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Subject-wise Performance</CardTitle>
+              <CardDescription>
+                Your performance in each subject compared to class average
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={performanceData}
@@ -100,212 +219,91 @@ const StudentReports: React.FC = () => {
                     <XAxis dataKey="subject" />
                     <YAxis />
                     <Tooltip />
-                    <Bar name="Internal" dataKey="internal" fill="#4f46e5" />
-                    <Bar name="External" dataKey="external" fill="#10b981" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                <h3 className="font-medium">Detailed Marks</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3">Subject</th>
-                        <th className="text-center py-3">Internal (50)</th>
-                        <th className="text-center py-3">External (50)</th>
-                        <th className="text-center py-3">Total (100)</th>
-                        <th className="text-center py-3">Grade</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {performanceData.map((subject, index) => {
-                        const total = subject.internal + subject.external;
-                        let grade = "F";
-                        if (total >= 90) grade = "S";
-                        else if (total >= 80) grade = "A";
-                        else if (total >= 70) grade = "B";
-                        else if (total >= 60) grade = "C";
-                        else if (total >= 50) grade = "D";
-                        else if (total >= 40) grade = "E";
-                        
-                        return (
-                          <tr key={index} className="border-b">
-                            <td className="py-3">{subject.subject}</td>
-                            <td className="text-center py-3">{subject.internal}</td>
-                            <td className="text-center py-3">{subject.external}</td>
-                            <td className="text-center py-3">{total}</td>
-                            <td className="text-center py-3 font-medium">{grade}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex justify-end">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => downloadReport("marks")}
-                  >
-                    <FileDown className="mr-2 h-4 w-4" />
-                    Download Marks Report
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="attendance" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Attendance Report</CardTitle>
-              <CardDescription>
-                Your attendance percentage across different subjects
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={attendanceData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="subject" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
+                    <Legend />
                     <Bar 
-                      dataKey="attendance" 
-                      name="Attendance %" 
-                      fill={(data) => data.attendance >= 75 ? "#10b981" : "#ef4444"}
+                      dataKey="marks" 
+                      name="Your Marks" 
+                      fill="#6366f1" 
+                    />
+                    <Bar 
+                      dataKey="classAvg" 
+                      name="Class Average" 
+                      fill="#9ca3af" 
                     />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-
+              
               <div className="mt-6 space-y-4">
-                <h3 className="font-medium">Detailed Attendance</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3">Subject</th>
-                        <th className="text-center py-3">Classes Held</th>
-                        <th className="text-center py-3">Classes Attended</th>
-                        <th className="text-center py-3">Percentage</th>
-                        <th className="text-center py-3">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attendanceData.map((subject, index) => {
-                        const classesHeld = Math.floor(Math.random() * 20) + 30; // Random number between 30-50
-                        const classesAttended = Math.floor(classesHeld * subject.attendance / 100);
-                        
-                        return (
-                          <tr key={index} className="border-b">
-                            <td className="py-3">{subject.subject}</td>
-                            <td className="text-center py-3">{classesHeld}</td>
-                            <td className="text-center py-3">{classesAttended}</td>
-                            <td className="text-center py-3">{subject.attendance}%</td>
-                            <td className={`text-center py-3 font-medium ${subject.attendance >= 75 ? "text-green-600" : "text-red-600"}`}>
-                              {subject.attendance >= 75 ? "Good" : "Low"}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex justify-end">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => downloadReport("attendance")}
-                  >
-                    <FileDown className="mr-2 h-4 w-4" />
-                    Download Attendance Report
-                  </Button>
-                </div>
+                {performanceData.map((subject) => (
+                  <div key={subject.subject} className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{subject.subject}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {subject.marks > subject.classAvg
+                          ? `${subject.marks - subject.classAvg} marks above average`
+                          : subject.marks < subject.classAvg
+                          ? `${subject.classAvg - subject.marks} marks below average`
+                          : "On par with class average"}
+                      </p>
+                    </div>
+                    <div className="text-sm font-medium">
+                      {subject.marks}/100
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-
-        <TabsContent value="semester" className="space-y-4 mt-4">
+        
+        <TabsContent value="progress" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Semester Report</CardTitle>
+              <CardTitle>Academic Progress</CardTitle>
               <CardDescription>
-                Overall performance for {selectedSemester === "current" ? "the current semester" : `semester ${selectedSemester.replace("sem", "")}`}
+                Your performance trend over the current semester
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>SGPA</CardDescription>
-                    <CardTitle className="text-3xl">{semesterData.sgpa}</CardTitle>
-                  </CardHeader>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>CGPA</CardDescription>
-                    <CardTitle className="text-3xl">{semesterData.cgpa}</CardTitle>
-                  </CardHeader>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Credits Earned</CardDescription>
-                    <CardTitle className="text-3xl">{semesterData.credits}</CardTitle>
-                  </CardHeader>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>Class Rank</CardDescription>
-                    <CardTitle className="text-3xl">{semesterData.rank}/{semesterData.classStrength}</CardTitle>
-                  </CardHeader>
-                </Card>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={progressData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="marks"
+                      name="Performance"
+                      stroke="#6366f1"
+                      strokeWidth={2}
+                      activeDot={{ r: 8 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
               
               <div className="mt-6">
-                <h3 className="font-medium mb-4">Semester Performance Trend</h3>
-                
-                <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={[
-                        { name: "Semester 1", sgpa: 8.2 },
-                        { name: "Semester 2", sgpa: 8.4 },
-                        { name: "Semester 3", sgpa: 8.1 },
-                        { name: "Semester 4", sgpa: 8.7 },
-                      ]}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis domain={[0, 10]} />
-                      <Tooltip />
-                      <Bar dataKey="sgpa" fill="#4f46e5" name="SGPA" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                
-                <div className="mt-6 flex justify-end">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => downloadReport("semester")}
-                  >
-                    <FileDown className="mr-2 h-4 w-4" />
-                    Download Semester Report
-                  </Button>
-                </div>
+                <h4 className="font-medium mb-2">Performance Analysis</h4>
+                <p className="text-sm text-muted-foreground">
+                  Your academic performance has shown a {
+                    progressData[progressData.length - 1].marks > progressData[0].marks
+                      ? "positive"
+                      : "negative"
+                  } trend over the semester with a {
+                    Math.abs(progressData[progressData.length - 1].marks - progressData[0].marks)
+                  }% {
+                    progressData[progressData.length - 1].marks > progressData[0].marks
+                      ? "improvement"
+                      : "decline"
+                  } from the beginning of the term.
+                </p>
               </div>
             </CardContent>
           </Card>

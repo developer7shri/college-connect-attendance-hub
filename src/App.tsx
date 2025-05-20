@@ -24,10 +24,14 @@ import HODMentoring from "@/pages/mentoring/HODMentoring";
 import TeacherMentoring from "@/pages/mentoring/TeacherMentoring";
 import StudentMentoring from "@/pages/mentoring/StudentMentoring";
 
-// New Pages
+// Attendance Pages
 import StudentAttendance from "@/pages/attendance/StudentAttendance";
 import TeacherAttendance from "@/pages/attendance/TeacherAttendance";
+
+// Leave Management
 import LeaveManagement from "@/pages/leave/LeaveManagement";
+
+// Reports
 import StudentReports from "@/pages/reports/StudentReports";
 
 const queryClient = new QueryClient();
@@ -50,6 +54,9 @@ const App = () => (
             <Route path="/admin" element={<MainLayout allowedRoles={["admin"]} />}>
               <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="attendance" element={<TeacherAttendance />} />
+              <Route path="leave" element={<LeaveManagement />} />
+              <Route path="reports" element={<StudentReports />} />
               {/* Add more admin routes here */}
             </Route>
             
@@ -59,6 +66,8 @@ const App = () => (
               <Route path="dashboard" element={<HODDashboard />} />
               <Route path="mentoring" element={<HODMentoring />} />
               <Route path="attendance" element={<TeacherAttendance />} />
+              <Route path="leave" element={<LeaveManagement />} />
+              <Route path="reports" element={<StudentReports />} />
               {/* Add more HOD routes here */}
             </Route>
             
@@ -70,6 +79,8 @@ const App = () => (
               <Route path="mentoring" element={<TeacherMentoring />} />
               <Route path="attendance" element={<TeacherAttendance />} />
               <Route path="leave" element={<LeaveManagement />} />
+              <Route path="reports" element={<StudentReports />} />
+              <Route path="students" element={<NotFound />} />
               {/* Add more teacher routes here */}
             </Route>
             
