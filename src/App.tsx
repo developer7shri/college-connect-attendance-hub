@@ -19,6 +19,11 @@ import QRGenerator from "@/pages/QRGenerator";
 import QRScanner from "@/pages/QRScanner";
 import NotFound from "@/pages/NotFound";
 
+// Mentoring Pages
+import HODMentoring from "@/pages/mentoring/HODMentoring";
+import TeacherMentoring from "@/pages/mentoring/TeacherMentoring";
+import StudentMentoring from "@/pages/mentoring/StudentMentoring";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -46,6 +51,7 @@ const App = () => (
             <Route path="/hod" element={<MainLayout allowedRoles={["hod"]} />}>
               <Route path="" element={<Navigate to="/hod/dashboard" replace />} />
               <Route path="dashboard" element={<HODDashboard />} />
+              <Route path="mentoring" element={<HODMentoring />} />
               {/* Add more HOD routes here */}
             </Route>
             
@@ -54,6 +60,7 @@ const App = () => (
               <Route path="" element={<Navigate to="/teacher/dashboard" replace />} />
               <Route path="dashboard" element={<TeacherDashboard />} />
               <Route path="qr-generator" element={<QRGenerator />} />
+              <Route path="mentoring" element={<TeacherMentoring />} />
               {/* Add more teacher routes here */}
             </Route>
             
@@ -62,6 +69,7 @@ const App = () => (
               <Route path="" element={<Navigate to="/student/dashboard" replace />} />
               <Route path="dashboard" element={<StudentDashboard />} />
               <Route path="qr-scanner" element={<QRScanner />} />
+              <Route path="mentoring" element={<StudentMentoring />} />
               {/* Add more student routes here */}
             </Route>
             
