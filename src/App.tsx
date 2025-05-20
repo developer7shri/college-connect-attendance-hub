@@ -24,6 +24,12 @@ import HODMentoring from "@/pages/mentoring/HODMentoring";
 import TeacherMentoring from "@/pages/mentoring/TeacherMentoring";
 import StudentMentoring from "@/pages/mentoring/StudentMentoring";
 
+// New Pages
+import StudentAttendance from "@/pages/attendance/StudentAttendance";
+import TeacherAttendance from "@/pages/attendance/TeacherAttendance";
+import LeaveManagement from "@/pages/leave/LeaveManagement";
+import StudentReports from "@/pages/reports/StudentReports";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -52,6 +58,7 @@ const App = () => (
               <Route path="" element={<Navigate to="/hod/dashboard" replace />} />
               <Route path="dashboard" element={<HODDashboard />} />
               <Route path="mentoring" element={<HODMentoring />} />
+              <Route path="attendance" element={<TeacherAttendance />} />
               {/* Add more HOD routes here */}
             </Route>
             
@@ -61,6 +68,8 @@ const App = () => (
               <Route path="dashboard" element={<TeacherDashboard />} />
               <Route path="qr-generator" element={<QRGenerator />} />
               <Route path="mentoring" element={<TeacherMentoring />} />
+              <Route path="attendance" element={<TeacherAttendance />} />
+              <Route path="leave" element={<LeaveManagement />} />
               {/* Add more teacher routes here */}
             </Route>
             
@@ -70,6 +79,9 @@ const App = () => (
               <Route path="dashboard" element={<StudentDashboard />} />
               <Route path="qr-scanner" element={<QRScanner />} />
               <Route path="mentoring" element={<StudentMentoring />} />
+              <Route path="attendance" element={<StudentAttendance />} />
+              <Route path="reports" element={<StudentReports />} />
+              <Route path="leave" element={<LeaveManagement />} />
               {/* Add more student routes here */}
             </Route>
             

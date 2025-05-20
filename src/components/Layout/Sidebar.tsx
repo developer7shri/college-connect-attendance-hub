@@ -92,7 +92,7 @@ const navItems: NavItem[] = [
     label: "Reports",
     href: "/reports",
     icon: FileText,
-    roles: ["admin", "hod", "teacher"],
+    roles: ["admin", "hod", "teacher", "student"],
     implemented: true,
   },
   {
