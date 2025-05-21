@@ -38,6 +38,7 @@ import StudentReports from "@/pages/reports/StudentReports";
 import Settings from "@/pages/Settings";
 import Profile from "@/pages/Profile";
 import Students from "@/pages/Students";
+import Departments from "@/pages/Departments";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/admin" element={<MainLayout allowedRoles={["admin"]} />}>
               <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="departments" element={<Departments />} />
               <Route path="attendance" element={<TeacherAttendance />} />
               <Route path="leave" element={<LeaveManagement />} />
               <Route path="reports" element={<StudentReports />} />

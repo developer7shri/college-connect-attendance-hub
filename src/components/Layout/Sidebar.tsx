@@ -22,7 +22,6 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   roles: UserRole[];
-  implemented?: boolean;  // Flag to mark implemented routes
 }
 
 const navItems: NavItem[] = [
@@ -31,84 +30,72 @@ const navItems: NavItem[] = [
     href: "/dashboard",
     icon: Home,
     roles: ["admin", "hod", "teacher", "student"],
-    implemented: true,
   },
   {
     label: "Departments",
     href: "/departments",
     icon: BookOpen,
     roles: ["admin"],
-    implemented: true,
   },
   {
     label: "Teachers",
     href: "/teachers",
     icon: Users,
     roles: ["admin", "hod"],
-    implemented: true,
   },
   {
     label: "Students",
     href: "/students",
     icon: Users,
     roles: ["admin", "hod", "teacher"],
-    implemented: true,
   },
   {
     label: "Attendance",
     href: "/attendance",
     icon: CheckSquare,
     roles: ["admin", "hod", "teacher", "student"],
-    implemented: true,
   },
   {
     label: "QR Scanner",
     href: "/student/qr-scanner",
     icon: QrCode,
     roles: ["student"],
-    implemented: true,
   },
   {
     label: "QR Generator",
     href: "/teacher/qr-generator",
     icon: QrCode,
     roles: ["teacher"],
-    implemented: true,
   },
   {
     label: "Mentoring",
     href: "/mentoring",
     icon: User,
     roles: ["hod", "teacher", "student"],
-    implemented: true,
   },
   {
     label: "Leave Management",
     href: "/leave",
     icon: Calendar,
     roles: ["hod", "teacher", "student"],
-    implemented: true,
   },
   {
     label: "Reports",
     href: "/reports",
     icon: FileText,
     roles: ["admin", "hod", "teacher", "student"],
-    implemented: true,
   },
   {
     label: "Profile",
     href: "/profile",
     icon: UserCircle,
     roles: ["admin", "hod", "teacher", "student"],
-    implemented: true,
   },
   {
     label: "Settings",
     href: "/settings",
     icon: Settings,
     roles: ["admin", "hod", "teacher", "student"],
-    implemented: true,
   },
 ];
 
@@ -122,8 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigation }) => {
 
   if (!user) return null;
 
-  // Filter navigation items based on user role - now showing all items 
-  // regardless of implementation status
+  // Filter navigation items based on user role
   const filteredNavItems = navItems.filter((item) => 
     item.roles.includes(user.role)
   );
