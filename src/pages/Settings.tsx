@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,17 +13,80 @@ import { Bell, Mail, Moon, Sun } from "lucide-react";
 const Settings = () => {
   const { authState } = useAuth();
   const { user } = authState;
+  const [darkMode, setDarkMode] = useState(false);
+
+  const [accountForm, setAccountForm] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    role: user?.role || "",
+    department: user?.department || "",
+  });
+
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  
+  const [notifications, setNotifications] = useState({
+    attendance: true,
+    email: true,
+    leave: true,
+    mentoring: true,
+  });
+
+  const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setAccountForm(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setPasswordForm(prev => ({
+      ...prev,
+      [id.replace('-', '')]: value
+    }));
+  };
+
+  const handleNotificationToggle = (id: string) => {
+    setNotifications(prev => ({
+      ...prev,
+      [id.replace('-notifications', '')]: !prev[id.replace('-notifications', '') as keyof typeof prev]
+    }));
+  };
 
   const handleSaveNotifications = () => {
     toast.success("Notification settings saved successfully");
   };
 
   const handleSaveAppearance = () => {
+    setDarkMode(!darkMode);
     toast.success("Appearance settings saved successfully");
+    // In a real app, we would apply dark mode to the entire app here
   };
 
   const handleSaveAccount = () => {
     toast.success("Account settings saved successfully");
+  };
+
+  const handleUpdatePassword = () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New password and confirm password do not match");
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      toast.error("Password should be at least 6 characters long");
+      return;
+    }
+    toast.success("Password updated successfully");
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
   };
 
   return (
@@ -57,7 +120,8 @@ const Settings = () => {
                   <Input
                     id="name"
                     className="col-span-3"
-                    defaultValue={user?.name}
+                    value={accountForm.name}
+                    onChange={handleAccountChange}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -65,7 +129,7 @@ const Settings = () => {
                   <Input
                     id="email"
                     className="col-span-3"
-                    defaultValue={user?.email}
+                    value={accountForm.email}
                     disabled
                   />
                 </div>
@@ -74,7 +138,7 @@ const Settings = () => {
                   <Input
                     id="role"
                     className="col-span-3"
-                    defaultValue={user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
+                    value={accountForm.role.charAt(0).toUpperCase() + accountForm.role.slice(1)}
                     disabled
                   />
                 </div>
@@ -84,7 +148,7 @@ const Settings = () => {
                     <Input
                       id="department"
                       className="col-span-3"
-                      defaultValue={user.department}
+                      value={accountForm.department}
                       disabled
                     />
                   </div>
@@ -111,6 +175,8 @@ const Settings = () => {
                     id="current-password"
                     type="password"
                     className="col-span-3"
+                    value={passwordForm.currentPassword}
+                    onChange={handlePasswordChange}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -119,6 +185,8 @@ const Settings = () => {
                     id="new-password"
                     type="password"
                     className="col-span-3"
+                    value={passwordForm.newPassword}
+                    onChange={handlePasswordChange}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -127,11 +195,13 @@ const Settings = () => {
                     id="confirm-password"
                     type="password"
                     className="col-span-3"
+                    value={passwordForm.confirmPassword}
+                    onChange={handlePasswordChange}
                   />
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => toast.success("Password updated successfully")}>
+                <Button onClick={handleUpdatePassword}>
                   Update Password
                 </Button>
               </div>
@@ -154,7 +224,11 @@ const Settings = () => {
                     <Bell className="h-4 w-4" />
                     <Label htmlFor="attendance-notifications">Attendance Notifications</Label>
                   </div>
-                  <Switch id="attendance-notifications" defaultChecked />
+                  <Switch 
+                    id="attendance-notifications" 
+                    checked={notifications.attendance}
+                    onCheckedChange={() => handleNotificationToggle('attendance-notifications')}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between space-x-2">
@@ -162,7 +236,11 @@ const Settings = () => {
                     <Mail className="h-4 w-4" />
                     <Label htmlFor="email-notifications">Email Notifications</Label>
                   </div>
-                  <Switch id="email-notifications" defaultChecked />
+                  <Switch 
+                    id="email-notifications" 
+                    checked={notifications.email}
+                    onCheckedChange={() => handleNotificationToggle('email-notifications')}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between space-x-2">
@@ -170,7 +248,11 @@ const Settings = () => {
                     <Bell className="h-4 w-4" />
                     <Label htmlFor="leave-notifications">Leave Request Notifications</Label>
                   </div>
-                  <Switch id="leave-notifications" defaultChecked />
+                  <Switch 
+                    id="leave-notifications" 
+                    checked={notifications.leave}
+                    onCheckedChange={() => handleNotificationToggle('leave-notifications')}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between space-x-2">
@@ -178,7 +260,11 @@ const Settings = () => {
                     <Bell className="h-4 w-4" />
                     <Label htmlFor="mentoring-notifications">Mentoring Notifications</Label>
                   </div>
-                  <Switch id="mentoring-notifications" defaultChecked />
+                  <Switch 
+                    id="mentoring-notifications" 
+                    checked={notifications.mentoring}
+                    onCheckedChange={() => handleNotificationToggle('mentoring-notifications')}
+                  />
                 </div>
               </div>
               <div className="flex justify-end mt-4">
@@ -205,7 +291,11 @@ const Settings = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Sun className="h-4 w-4 text-muted-foreground" />
-                    <Switch id="theme-mode" />
+                    <Switch 
+                      id="theme-mode" 
+                      checked={darkMode} 
+                      onCheckedChange={() => setDarkMode(!darkMode)}
+                    />
                     <Moon className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>

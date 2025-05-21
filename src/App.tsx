@@ -69,7 +69,6 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
               <Route path="profile" element={<Profile />} />
               <Route path="students" element={<Students />} />
-              {/* Add more admin routes here */}
             </Route>
             
             {/* HOD Routes */}
@@ -84,7 +83,6 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
               <Route path="profile" element={<Profile />} />
               <Route path="students" element={<Students />} />
-              {/* Add more HOD routes here */}
             </Route>
             
             {/* Teacher Routes */}
@@ -99,7 +97,6 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
               <Route path="profile" element={<Profile />} />
               <Route path="students" element={<Students />} />
-              {/* Add more teacher routes here */}
             </Route>
             
             {/* Student Routes */}
@@ -113,7 +110,6 @@ const App = () => (
               <Route path="leave" element={<LeaveManagement />} />
               <Route path="settings" element={<Settings />} />
               <Route path="profile" element={<Profile />} />
-              {/* Add more student routes here */}
             </Route>
             
             {/* Generic role routes */}

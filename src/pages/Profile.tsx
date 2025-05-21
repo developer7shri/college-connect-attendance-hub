@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,11 +7,35 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Mail, Phone, MapPin, Building, BookOpen, Calendar } from "lucide-react";
+import { Mail, Phone, MapPin, Building, BookOpen, Calendar, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const Profile = () => {
   const { authState } = useAuth();
   const { user } = authState;
+  
+  const [editMode, setEditMode] = useState(false);
+  const [bioText, setBioText] = useState(
+    user?.role === "student" 
+      ? "Dedicated student passionate about learning and growth. Active participant in classroom activities and eager to expand knowledge through practical applications." 
+      : user?.role === "teacher" 
+        ? "Experienced educator committed to fostering a supportive learning environment. Specialized in interactive teaching methodologies that engage students and encourage critical thinking."
+        : user?.role === "hod"
+          ? "Department Head with extensive experience in academic leadership. Committed to maintaining educational excellence and fostering innovation within the department."
+          : "Administrator responsible for overseeing the college attendance management system. Focused on improving efficiency and accuracy of attendance tracking."
+  );
+  
+  const [profileData, setProfileData] = useState({
+    phone: "+91 98765XXXXX",
+    education: user?.role === "student" 
+      ? "Bachelor of Technology - Computer Science" 
+      : "Ph.D in Computer Science - Stanford University"
+  });
+  
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   if (!user) return null;
 
@@ -44,6 +68,44 @@ const Profile = () => {
     date: getRandomDate()
   }));
 
+  const handleEditProfile = () => {
+    setEditMode(true);
+  };
+
+  const handleSaveProfile = () => {
+    setEditMode(false);
+    toast.success("Profile updated successfully");
+  };
+
+  const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setBioText(e.target.value);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleAvatarUpload = () => {
+    if (selectedFile) {
+      // In a real app, this would upload the file to a server
+      toast.success("Avatar updated successfully");
+      setIsAvatarDialogOpen(false);
+      setSelectedFile(null);
+    } else {
+      toast.error("Please select a file first");
+    }
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
@@ -68,17 +130,60 @@ const Profile = () => {
                 <Button 
                   variant="outline" 
                   className="w-full mb-2"
-                  onClick={() => toast.info("This feature is coming soon")}
+                  onClick={handleEditProfile}
                 >
                   Edit Profile
                 </Button>
-                <Button
-                  variant="secondary"
-                  className="w-full"
-                  onClick={() => toast.info("This feature is coming soon")}
-                >
-                  Change Avatar
-                </Button>
+                
+                <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                    >
+                      Change Avatar
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Change Profile Picture</DialogTitle>
+                      <DialogDescription>
+                        Upload a new profile picture. Files should be JPG, PNG or GIF and less than 2MB.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-16 w-16">
+                          {selectedFile ? (
+                            <AvatarImage
+                              src={URL.createObjectURL(selectedFile)}
+                              alt="Preview"
+                            />
+                          ) : (
+                            <>
+                              <AvatarImage src={user.profileImageUrl} alt={user.name} />
+                              <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                            </>
+                          )}
+                        </Avatar>
+                        <div className="flex-1">
+                          <Input
+                            id="picture"
+                            type="file"
+                            onChange={handleFileChange}
+                            accept="image/*"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsAvatarDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleAvatarUpload}>Upload</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <Separator className="my-6" />
@@ -90,12 +195,28 @@ const Profile = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">+91 98765XXXXX</span>
+                  {editMode ? (
+                    <Input
+                      id="phone"
+                      className="h-8 text-sm"
+                      value={profileData.phone}
+                      onChange={handleInputChange}
+                    />
+                  ) : (
+                    <span className="text-sm">{profileData.phone}</span>
+                  )}
                 </div>
                 {user.department && (
                   <div className="flex items-center gap-2">
                     <Building className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{user.department} Department</span>
+                  </div>
+                )}
+                {editMode && (
+                  <div className="mt-4">
+                    <Button onClick={handleSaveProfile} size="sm" className="w-full">
+                      Save Changes
+                    </Button>
                   </div>
                 )}
               </div>
@@ -110,15 +231,18 @@ const Profile = () => {
               <CardDescription>Your personal bio and information</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm">
-                {user.role === "student" 
-                  ? "Dedicated student passionate about learning and growth. Active participant in classroom activities and eager to expand knowledge through practical applications." 
-                  : user.role === "teacher" 
-                    ? "Experienced educator committed to fostering a supportive learning environment. Specialized in interactive teaching methodologies that engage students and encourage critical thinking."
-                    : user.role === "hod"
-                      ? "Department Head with extensive experience in academic leadership. Committed to maintaining educational excellence and fostering innovation within the department."
-                      : "Administrator responsible for overseeing the college attendance management system. Focused on improving efficiency and accuracy of attendance tracking."}
-              </p>
+              {editMode ? (
+                <Textarea
+                  className="mb-4"
+                  value={bioText}
+                  onChange={handleBioChange}
+                  rows={4}
+                />
+              ) : (
+                <p className="text-sm">
+                  {bioText}
+                </p>
+              )}
 
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-muted rounded-lg p-4">
@@ -126,11 +250,16 @@ const Profile = () => {
                     <BookOpen className="h-4 w-4 text-primary" />
                     <h3 className="font-medium">Education</h3>
                   </div>
-                  <p className="text-sm">
-                    {user.role === "student" 
-                      ? "Bachelor of Technology - Computer Science" 
-                      : "Ph.D in Computer Science - Stanford University"}
-                  </p>
+                  {editMode ? (
+                    <Input
+                      id="education"
+                      className="h-8 text-sm"
+                      value={profileData.education}
+                      onChange={handleInputChange}
+                    />
+                  ) : (
+                    <p className="text-sm">{profileData.education}</p>
+                  )}
                 </div>
                 
                 <div className="bg-muted rounded-lg p-4">
