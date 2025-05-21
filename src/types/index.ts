@@ -88,3 +88,21 @@ export interface QRCodeData {
   timestamp: string;
   expiresAt: string;
 }
+
+// User Creation Request
+export interface UserCreationRequest {
+  name: string;
+  email: string;
+  department: string;
+  role: UserRole;
+  semester?: number; // For students only
+}
+
+// Generated Credentials
+export interface GeneratedCredentials {
+  username: string;
+  password: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
