@@ -3,8 +3,13 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, QrCode, UserCheck, Calendar, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const TeacherDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   // This would be fetched from API in a real application
   const dashboardStats = {
     totalStudents: 60,
@@ -12,6 +17,26 @@ const TeacherDashboard: React.FC = () => {
     studentsAbsent: 8,
     pendingLeaves: 3,
     mentees: 10,
+  };
+
+  const handleGenerateQR = () => {
+    navigate("/teacher/qr-generator");
+  };
+
+  const handleAddStudent = () => {
+    navigate("/teacher/students");
+  };
+
+  const handleReviewLeaveRequests = () => {
+    navigate("/teacher/leave");
+  };
+
+  const handleMenteeUpdates = () => {
+    navigate("/teacher/mentoring");
+    toast({
+      title: "Mentee Section",
+      description: "Viewing your mentees information",
+    });
   };
 
   return (
@@ -121,19 +146,35 @@ const TeacherDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="justify-start">
+              <Button 
+                variant="outline" 
+                className="justify-start"
+                onClick={handleGenerateQR}
+              >
                 <QrCode className="mr-2 h-4 w-4" />
                 Generate QR Code
               </Button>
-              <Button variant="outline" className="justify-start">
+              <Button 
+                variant="outline" 
+                className="justify-start"
+                onClick={handleAddStudent}
+              >
                 <Users className="mr-2 h-4 w-4" />
                 Add Student
               </Button>
-              <Button variant="outline" className="justify-start">
+              <Button 
+                variant="outline" 
+                className="justify-start"
+                onClick={handleReviewLeaveRequests}
+              >
                 <Calendar className="mr-2 h-4 w-4" />
                 Review Leave Requests
               </Button>
-              <Button variant="outline" className="justify-start">
+              <Button 
+                variant="outline" 
+                className="justify-start"
+                onClick={handleMenteeUpdates}
+              >
                 <User className="mr-2 h-4 w-4" />
                 Mentee Updates
               </Button>
