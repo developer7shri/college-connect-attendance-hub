@@ -39,6 +39,7 @@ import Settings from "@/pages/Settings";
 import Profile from "@/pages/Profile";
 import Students from "@/pages/Students";
 import Departments from "@/pages/Departments";
+import Teachers from "@/pages/Teachers";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="departments" element={<Departments />} />
+              <Route path="teachers" element={<Teachers />} />
               <Route path="attendance" element={<TeacherAttendance />} />
               <Route path="leave" element={<LeaveManagement />} />
               <Route path="reports" element={<StudentReports />} />
@@ -74,6 +76,7 @@ const App = () => (
             <Route path="/hod" element={<MainLayout allowedRoles={["hod"]} />}>
               <Route path="" element={<Navigate to="/hod/dashboard" replace />} />
               <Route path="dashboard" element={<HODDashboard />} />
+              <Route path="teachers" element={<Teachers />} />
               <Route path="mentoring" element={<HODMentoring />} />
               <Route path="attendance" element={<TeacherAttendance />} />
               <Route path="leave" element={<LeaveManagement />} />
