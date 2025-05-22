@@ -1,0 +1,6 @@
+
+// Export all admin dashboard components
+export { default as DashboardStats } from './DashboardStats';
+export { default as RecentActivities } from './RecentActivities';
+export { default as QuickActions } from './QuickActions';
+export { default as AddHODDialog } from './AddHODDialog';
