@@ -1,4 +1,3 @@
-
 // User roles
 export type UserRole = 'admin' | 'hod' | 'teacher' | 'student';
 
@@ -10,6 +9,7 @@ export interface User {
   role: UserRole;
   department?: string;
   profileImageUrl?: string;
+  phone?: string; // Added phone field
 }
 
 // Authentication state
@@ -97,6 +97,7 @@ export interface UserCreationRequest {
   department: string;
   role: UserRole;
   semester?: number; // For students only
+  phone?: string; // Added phone field
 }
 
 // Generated Credentials

@@ -2,13 +2,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { GeneratedCredentials } from "@/types";
+import { GeneratedCredentials, User } from "@/types";
 import { 
   DashboardStats, 
   RecentActivities, 
   QuickActions,
-  AddHODDialog
+  AddHODDialog,
+  EditHODDialog,
+  ManageHODsTable 
 } from "./admin";
+import { toast } from "@/components/ui/sonner";
 
 type HODFormValues = {
   name: string;
@@ -17,10 +20,19 @@ type HODFormValues = {
   department: string;
 };
 
+type EditHODFormValues = {
+  name: string;
+  email: string;
+  phone: string;
+  department: string;
+};
+
 const AdminDashboard: React.FC = () => {
-  const { getUsersByRole, createUser, departments } = useAuth();
+  const { getUsersByRole, createUser, departments, updateUserProfile } = useAuth();
   const navigate = useNavigate();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedHOD, setSelectedHOD] = useState<User | null>(null);
 
   // This would be fetched from API in a real application
   const dashboardStats = {
@@ -39,7 +51,7 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const handleAddHOD = () => {
-    setDialogOpen(true);
+    setAddDialogOpen(true);
   };
 
   const handleCreateDepartment = () => {
@@ -63,6 +75,28 @@ const AdminDashboard: React.FC = () => {
       role: "hod"
     });
   };
+
+  const handleEditHOD = (hod: User) => {
+    setSelectedHOD(hod);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateHOD = (data: EditHODFormValues) => {
+    if (!selectedHOD) return;
+    
+    const updatedUser: User = {
+      ...selectedHOD,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      department: data.department
+    };
+    
+    updateUserProfile(updatedUser);
+    toast.success(`HOD ${data.name} has been updated successfully`);
+  };
+
+  const hods = getUsersByRole("hod");
 
   return (
     <div className="space-y-6">
@@ -92,11 +126,24 @@ const AdminDashboard: React.FC = () => {
         />
       </div>
 
+      <ManageHODsTable 
+        hods={hods} 
+        onEdit={handleEditHOD} 
+      />
+
       <AddHODDialog
-        open={dialogOpen}
+        open={addDialogOpen}
         departments={departments}
-        onOpenChange={setDialogOpen}
+        onOpenChange={setAddDialogOpen}
         onSubmit={handleSubmitHODForm}
+      />
+
+      <EditHODDialog
+        open={editDialogOpen}
+        departments={departments}
+        onOpenChange={setEditDialogOpen}
+        onSubmit={handleUpdateHOD}
+        hod={selectedHOD}
       />
     </div>
   );
