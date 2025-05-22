@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthState, User, UserRole, GeneratedCredentials, UserCreationRequest } from "@/types";
 import { toast } from "@/components/ui/sonner";
@@ -240,11 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Students cannot create users
       currentUser.role === 'student'
     ) {
-      toast({
-        title: "Permission Denied",
-        description: "You don't have permission to create this type of user",
-        variant: "destructive"
-      });
+      toast.error("Permission Denied: You don't have permission to create this type of user");
       return null;
     }
 
@@ -252,11 +247,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const username = generateUsername(userRequest.role, userRequest.name, userRequest.department);
     // Check if username already exists
     if (allUsers[username]) {
-      toast({
-        title: "Error Creating User",
-        description: "Username already exists in the system",
-        variant: "destructive"
-      });
+      toast.error("Error Creating User: Username already exists in the system");
       return null;
     }
 
@@ -281,10 +272,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }));
 
-    toast({
-      title: "User Created Successfully",
-      description: `Created ${userRequest.role}: ${userRequest.name}`,
-    });
+    toast.success(`User Created Successfully: Created ${userRequest.role}: ${userRequest.name}`);
 
     return {
       username,
