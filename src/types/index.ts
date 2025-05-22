@@ -93,6 +93,7 @@ export interface QRCodeData {
 export interface UserCreationRequest {
   name: string;
   email: string;
+  password?: string;  // Added password field as optional
   department: string;
   role: UserRole;
   semester?: number; // For students only

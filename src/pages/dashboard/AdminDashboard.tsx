@@ -13,6 +13,7 @@ import {
 type HODFormValues = {
   name: string;
   email: string;
+  password: string;
   department: string;
 };
 
@@ -57,6 +58,7 @@ const AdminDashboard: React.FC = () => {
     return createUser({
       name: data.name,
       email: data.email,
+      password: data.password,
       department: data.department,
       role: "hod"
     });

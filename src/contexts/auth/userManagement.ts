@@ -42,13 +42,17 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
 
     // Generate username and password
     const username = generateUsername(userRequest.role, userRequest.name, userRequest.department);
+    
     // Check if username already exists
     if (allUsers[username]) {
       toast.error("Error Creating User: Username already exists in the system");
       return null;
     }
 
-    const password = userRequest.role === 'student' ? username : generateRandomString(8);
+    // Use provided password or generate a random one
+    const password = userRequest.password || 
+      (userRequest.role === 'student' ? username : generateRandomString(8));
+    
     const userId = `${Object.keys(allUsers).length + 1}`;
 
     const newUser: User = {

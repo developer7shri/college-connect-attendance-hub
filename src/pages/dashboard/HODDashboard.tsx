@@ -19,6 +19,9 @@ const teacherFormSchema = z.object({
   }),
   email: z.string().email({
     message: "Please enter a valid email address.",
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
   })
 });
 
@@ -35,6 +38,7 @@ const HODDashboard: React.FC = () => {
     defaultValues: {
       name: "",
       email: "",
+      password: "",
     },
   });
 
@@ -53,6 +57,7 @@ const HODDashboard: React.FC = () => {
     const credentials = createUser({
       name: data.name,
       email: data.email,
+      password: data.password,
       department: authState.user.department,
       role: "teacher"
     });
@@ -253,6 +258,19 @@ const HODDashboard: React.FC = () => {
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input placeholder="john@scahts.edu" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

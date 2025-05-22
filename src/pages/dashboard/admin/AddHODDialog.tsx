@@ -37,6 +37,9 @@ const hodFormSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
+  }),
   department: z.string().min(1, {
     message: "Please select a department.",
   })
@@ -64,6 +67,7 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
     defaultValues: {
       name: "",
       email: "",
+      password: "",
       department: "",
     },
   });
@@ -121,6 +125,19 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input placeholder="hod@scahts.edu" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Enter password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
