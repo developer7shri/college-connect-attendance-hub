@@ -5,18 +5,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, XCircle, Search, FileDown, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 const TeacherAttendance: React.FC = () => {
   const { toast } = useToast();
+  const { authState } = useAuth();
   const [selectedClass, setSelectedClass] = useState("cs3a");
   const [selectedSubject, setSelectedSubject] = useState("ds");
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("mark");
+  const userRole = authState.user?.role || "";
+
+  // Set default tab based on user role
+  React.useEffect(() => {
+    if (userRole === "admin" || userRole === "hod") {
+      setActiveTab("reports");
+    } else {
+      setActiveTab("mark");
+    }
+  }, [userRole]);
 
   // Mock data for classes and subjects
   const classes = [
@@ -110,173 +123,189 @@ const TeacherAttendance: React.FC = () => {
       .toUpperCase();
   };
 
+  // Function to determine if the user can mark attendance
+  const canMarkAttendance = userRole === "teacher";
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Attendance Management</h1>
-        <p className="text-muted-foreground">
-          Mark and manage student attendance records
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Attendance Management</h1>
+          <p className="text-muted-foreground">
+            {canMarkAttendance 
+              ? "Mark and manage student attendance records" 
+              : "View and download attendance reports"
+            }
+          </p>
+        </div>
+        
+        {!canMarkAttendance && (
+          <Badge variant="secondary" className="text-sm px-3 py-1">
+            View-only mode
+          </Badge>
+        )}
       </div>
 
-      <Tabs defaultValue="mark">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="mark">Mark Attendance</TabsTrigger>
+          {canMarkAttendance && <TabsTrigger value="mark">Mark Attendance</TabsTrigger>}
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="mark" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Mark Attendance</CardTitle>
-              <CardDescription>
-                Record attendance for your class
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="class">Class</Label>
-                  <Select value={selectedClass} onValueChange={setSelectedClass}>
-                    <SelectTrigger id="class">
-                      <SelectValue placeholder="Select Class" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {classes.map(cls => (
-                        <SelectItem key={cls.id} value={cls.id}>
-                          {cls.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        {canMarkAttendance && (
+          <TabsContent value="mark" className="space-y-4 mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Mark Attendance</CardTitle>
+                <CardDescription>
+                  Record attendance for your class
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="class">Class</Label>
+                    <Select value={selectedClass} onValueChange={setSelectedClass}>
+                      <SelectTrigger id="class">
+                        <SelectValue placeholder="Select Class" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classes.map(cls => (
+                          <SelectItem key={cls.id} value={cls.id}>
+                            {cls.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="subject">Subject</Label>
+                    <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                      <SelectTrigger id="subject">
+                        <SelectValue placeholder="Select Subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects.map(subject => (
+                          <SelectItem key={subject.id} value={subject.id}>
+                            {subject.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="date">Date</Label>
+                    <div className="relative">
+                      <Input 
+                        id="date" 
+                        type="date" 
+                        value={date ? date.toISOString().split('T')[0] : ''} 
+                        onChange={(e) => setDate(new Date(e.target.value))}
+                      />
+                    </div>
+                  </div>
                 </div>
                 
-                <div>
-                  <Label htmlFor="subject">Subject</Label>
-                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                    <SelectTrigger id="subject">
-                      <SelectValue placeholder="Select Subject" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subjects.map(subject => (
-                        <SelectItem key={subject.id} value={subject.id}>
-                          {subject.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="date">Date</Label>
+                <div className="flex justify-between gap-4 flex-wrap">
+                  <div className="flex gap-2 items-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Mark all present
+                        toast({
+                          title: "All Present",
+                          description: "All students marked as present",
+                        });
+                      }}
+                    >
+                      <Check className="mr-1 h-4 w-4" />
+                      Mark All Present
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Mark all absent
+                        toast({
+                          title: "All Absent",
+                          description: "All students marked as absent",
+                        });
+                      }}
+                    >
+                      <X className="mr-1 h-4 w-4" />
+                      Mark All Absent
+                    </Button>
+                  </div>
+                  
                   <div className="relative">
-                    <Input 
-                      id="date" 
-                      type="date" 
-                      value={date ? date.toISOString().split('T')[0] : ''} 
-                      onChange={(e) => setDate(new Date(e.target.value))}
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search by name or USN"
+                      className="pl-8 w-full md:w-auto"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex justify-between gap-4 flex-wrap">
-                <div className="flex gap-2 items-center">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => {
-                      // Mark all present
-                      toast({
-                        title: "All Present",
-                        description: "All students marked as present",
-                      });
-                    }}
-                  >
-                    <Check className="mr-1 h-4 w-4" />
-                    Mark All Present
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => {
-                      // Mark all absent
-                      toast({
-                        title: "All Absent",
-                        description: "All students marked as absent",
-                      });
-                    }}
-                  >
-                    <X className="mr-1 h-4 w-4" />
-                    Mark All Absent
-                  </Button>
+                
+                <div className="border rounded-md overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-muted border-b">
+                        <th className="text-left py-3 px-4">USN</th>
+                        <th className="text-left py-3 px-4">Name</th>
+                        <th className="text-center py-3 px-4">Attendance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredStudents.map((student) => (
+                        <tr key={student.id} className="border-b">
+                          <td className="py-3 px-4">{student.usn}</td>
+                          <td className="py-3 px-4">{student.name}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex justify-center">
+                              <button
+                                onClick={() => togglePresence(student.id)}
+                                className={`rounded-full p-1 ${
+                                  student.present
+                                    ? "bg-green-100 text-green-600 hover:bg-green-200"
+                                    : "bg-red-100 text-red-600 hover:bg-red-200"
+                                }`}
+                              >
+                                {student.present ? (
+                                  <CheckCircle2 className="h-6 w-6" />
+                                ) : (
+                                  <XCircle className="h-6 w-6" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
                 
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search by name or USN"
-                    className="pl-8 w-full md:w-auto"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                <div className="flex justify-between">
+                  <Button 
+                    variant="outline"
+                    onClick={generateQRCode}
+                  >
+                    Generate QR Code
+                  </Button>
+                  <Button onClick={handleSaveAttendance}>
+                    Save Attendance
+                  </Button>
                 </div>
-              </div>
-              
-              <div className="border rounded-md overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-muted border-b">
-                      <th className="text-left py-3 px-4">USN</th>
-                      <th className="text-left py-3 px-4">Name</th>
-                      <th className="text-center py-3 px-4">Attendance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStudents.map((student) => (
-                      <tr key={student.id} className="border-b">
-                        <td className="py-3 px-4">{student.usn}</td>
-                        <td className="py-3 px-4">{student.name}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex justify-center">
-                            <button
-                              onClick={() => togglePresence(student.id)}
-                              className={`rounded-full p-1 ${
-                                student.present
-                                  ? "bg-green-100 text-green-600 hover:bg-green-200"
-                                  : "bg-red-100 text-red-600 hover:bg-red-200"
-                              }`}
-                            >
-                              {student.present ? (
-                                <CheckCircle2 className="h-6 w-6" />
-                              ) : (
-                                <XCircle className="h-6 w-6" />
-                              )}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="flex justify-between">
-                <Button 
-                  variant="outline"
-                  onClick={generateQRCode}
-                >
-                  Generate QR Code
-                </Button>
-                <Button onClick={handleSaveAttendance}>
-                  Save Attendance
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         <TabsContent value="reports" className="space-y-4 mt-4">
           <Card>
