@@ -34,7 +34,16 @@ const teacherFormSchema = z.object({
   }),
   password: z.string().min(6, {
     message: "Password must be at least 6 characters.",
-  })
+  }),
+  phone: z.string().min(10, {
+    message: "Phone number must be at least 10 digits.",
+  }).optional(),
+  subjectName: z.string().min(2, {
+    message: "Subject name must be at least 2 characters.",
+  }),
+  subjectCode: z.string().min(2, {
+    message: "Subject code must be at least 2 characters.",
+  }),
 });
 
 type TeacherFormValues = z.infer<typeof teacherFormSchema>;
@@ -57,6 +66,9 @@ const AddTeacherDialog: React.FC<AddTeacherDialogProps> = ({
       name: "",
       email: "",
       password: "",
+      phone: "",
+      subjectName: "",
+      subjectCode: "",
     },
   });
 
@@ -70,7 +82,10 @@ const AddTeacherDialog: React.FC<AddTeacherDialogProps> = ({
       name: data.name,
       email: data.email,
       password: data.password,
+      phone: data.phone,
       department: authState.user.department,
+      subjectName: data.subjectName,
+      subjectCode: data.subjectCode,
       role: "teacher"
     });
 
@@ -94,9 +109,9 @@ const AddTeacherDialog: React.FC<AddTeacherDialogProps> = ({
         onOpenChange(true);
       }
     }}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Teacher</DialogTitle>
+          <DialogTitle className="text-2xl">Add New Teacher</DialogTitle>
           <DialogDescription>
             Create a new teacher account for your department. The system will generate credentials.
           </DialogDescription>
@@ -112,25 +127,42 @@ const AddTeacherDialog: React.FC<AddTeacherDialogProps> = ({
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="John Doe" {...field} className="bg-background" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="john@scahts.edu" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="john@scahts.edu" {...field} className="bg-background" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="1234567890" {...field} className="bg-background" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
               <FormField
                 control={form.control}
                 name="password"
@@ -138,36 +170,70 @@ const AddTeacherDialog: React.FC<AddTeacherDialogProps> = ({
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Enter password" {...field} />
+                      <Input type="password" placeholder="Enter password" {...field} className="bg-background" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <DialogFooter>
-                <Button type="submit">Create Teacher Account</Button>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="subjectName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subject Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Data Structures" {...field} className="bg-background" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="subjectCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subject Code</FormLabel>
+                      <FormControl>
+                        <Input placeholder="CS101" {...field} className="bg-background" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <DialogFooter className="pt-4">
+                <Button type="submit" className="w-full md:w-auto">Create Teacher Account</Button>
               </DialogFooter>
             </form>
           </Form>
         ) : (
           <div className="space-y-4">
-            <div className="border rounded p-4 bg-muted/50">
-              <h4 className="font-medium mb-2">Teacher Account Created</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="text-muted-foreground">Name:</div>
+            <div className="border rounded-lg p-6 bg-muted/30 shadow-sm">
+              <h4 className="font-medium mb-4 text-lg text-center text-primary">Teacher Account Created Successfully</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="text-muted-foreground font-medium">Name:</div>
                 <div>{createdCredentials.name}</div>
-                <div className="text-muted-foreground">Username:</div>
-                <div className="font-mono">{createdCredentials.username}</div>
-                <div className="text-muted-foreground">Password:</div>
-                <div className="font-mono">{createdCredentials.password}</div>
-                <div className="text-muted-foreground">Email:</div>
+                <div className="text-muted-foreground font-medium">Username:</div>
+                <div className="font-mono bg-muted p-1 rounded">{createdCredentials.username}</div>
+                <div className="text-muted-foreground font-medium">Password:</div>
+                <div className="font-mono bg-muted p-1 rounded">{createdCredentials.password}</div>
+                <div className="text-muted-foreground font-medium">Email:</div>
                 <div>{createdCredentials.email}</div>
-                <div className="text-muted-foreground">Department:</div>
+                <div className="text-muted-foreground font-medium">Phone:</div>
+                <div>{form.getValues().phone || "Not provided"}</div>
+                <div className="text-muted-foreground font-medium">Subject:</div>
+                <div>{form.getValues().subjectName} ({form.getValues().subjectCode})</div>
+                <div className="text-muted-foreground font-medium">Department:</div>
                 <div>{authState.user?.department}</div>
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleClose}>Close</Button>
+              <Button onClick={handleClose} className="w-full md:w-auto">Close</Button>
             </DialogFooter>
           </div>
         )}

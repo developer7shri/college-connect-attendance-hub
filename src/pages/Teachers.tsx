@@ -11,18 +11,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { UserPlus, UserCog } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { UserPlus, UserCog, Search } from "lucide-react";
 import { User } from "@/types";
 import AddTeacherDialog from "@/components/dialogs/AddTeacherDialog";
 
 const Teachers = () => {
   const { authState, getUsersByRole, getUsersByDepartment } = useAuth();
   const [addTeacherDialogOpen, setAddTeacherDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Get teachers based on user role
-  const teachers = authState.user?.role === "admin" 
+  const allTeachers = authState.user?.role === "admin" 
     ? getUsersByRole("teacher")
     : getUsersByDepartment(authState.user?.department || "").filter(user => user.role === "teacher");
+  
+  // Filter teachers based on search term
+  const teachers = allTeachers.filter(teacher => 
+    teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (teacher.subjectName && teacher.subjectName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (teacher.subjectCode && teacher.subjectCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (teacher.phone && teacher.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6">
@@ -34,11 +45,23 @@ const Teachers = () => {
           </p>
         </div>
         {authState.user?.role === "hod" && (
-          <Button onClick={() => setAddTeacherDialogOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
+          <Button onClick={() => setAddTeacherDialogOpen(true)} className="gap-2">
+            <UserPlus className="h-4 w-4" />
             Add New Teacher
           </Button>
         )}
+      </div>
+
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <Input 
+          placeholder="Search teachers by name, email, subject or phone..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 mb-4"
+        />
       </div>
 
       <div className="rounded-md border">
@@ -49,6 +72,7 @@ const Teachers = () => {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Department</TableHead>
+              <TableHead>Subject</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
@@ -56,7 +80,7 @@ const Teachers = () => {
           <TableBody>
             {teachers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center">No teachers found</TableCell>
+                <TableCell colSpan={6} className="text-center">No teachers found</TableCell>
               </TableRow>
             ) : (
               teachers.map((teacher: User) => (
@@ -64,6 +88,16 @@ const Teachers = () => {
                   <TableCell className="font-medium">{teacher.name}</TableCell>
                   <TableCell>{teacher.email}</TableCell>
                   <TableCell>{teacher.department}</TableCell>
+                  <TableCell>
+                    {teacher.subjectName ? (
+                      <>
+                        {teacher.subjectName}
+                        {teacher.subjectCode && <span className="text-xs text-muted-foreground ml-1">({teacher.subjectCode})</span>}
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Not assigned</span>
+                    )}
+                  </TableCell>
                   <TableCell>{teacher.phone || "Not available"}</TableCell>
                   <TableCell>
                     <Button variant="ghost" size="sm">

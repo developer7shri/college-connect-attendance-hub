@@ -10,7 +10,11 @@ export interface User {
   role: UserRole;
   department?: string;
   profileImageUrl?: string;
-  phone?: string; // Added phone field
+  phone?: string;
+  subjectName?: string;
+  subjectCode?: string;
+  usn?: string; // USN for students
+  semester?: number;
 }
 
 // Authentication state
@@ -94,11 +98,14 @@ export interface QRCodeData {
 export interface UserCreationRequest {
   name: string;
   email: string;
-  password?: string;  // Added password field as optional
+  password?: string;
   department: string;
   role: UserRole;
-  semester?: number; // For students only
-  phone?: string; // Added phone field
+  semester?: number;
+  phone?: string;
+  subjectName?: string;
+  subjectCode?: string;
+  usn?: string;
 }
 
 // Generated Credentials
