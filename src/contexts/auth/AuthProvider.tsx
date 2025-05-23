@@ -134,7 +134,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         getAllUsers,
         getUsersByDepartment,
         getUsersByRole,
-        departments
+        departments,
+        updateUserProfile // Add this to fix the TS error
       }}
     >
       {children}

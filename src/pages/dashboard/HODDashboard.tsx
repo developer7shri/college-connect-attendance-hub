@@ -5,42 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Users, UserCheck, UserPlus, Calendar, CheckSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { GeneratedCredentials } from "@/types";
-
-const teacherFormSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  })
-});
-
-type TeacherFormValues = z.infer<typeof teacherFormSchema>;
+import AddTeacherDialog from "@/components/dialogs/AddTeacherDialog";
 
 const HODDashboard: React.FC = () => {
-  const { authState, getUsersByDepartment, createUser } = useAuth();
+  const { authState, getUsersByDepartment } = useAuth();
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [createdCredentials, setCreatedCredentials] = useState<GeneratedCredentials | null>(null);
-
-  const form = useForm<TeacherFormValues>({
-    resolver: zodResolver(teacherFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-  });
 
   // This would be fetched from API in a real application
   const dashboardStats = {
@@ -51,24 +21,7 @@ const HODDashboard: React.FC = () => {
     pendingLeaves: 5,
   };
 
-  function onSubmit(data: TeacherFormValues) {
-    if (!authState.user?.department) return;
-    
-    const credentials = createUser({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      department: authState.user.department,
-      role: "teacher"
-    });
-
-    if (credentials) {
-      setCreatedCredentials(credentials);
-    }
-  }
-
   const handleAddTeacher = () => {
-    setCreatedCredentials(null);
     setDialogOpen(true);
   };
 
@@ -225,86 +178,10 @@ const HODDashboard: React.FC = () => {
       </div>
 
       {/* Add Teacher Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Teacher</DialogTitle>
-            <DialogDescription>
-              Create a new teacher account for your department. The system will generate credentials.
-            </DialogDescription>
-          </DialogHeader>
-
-          {!createdCredentials ? (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="john@scahts.edu" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <DialogFooter>
-                  <Button type="submit">Create Teacher Account</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          ) : (
-            <div className="space-y-4">
-              <div className="border rounded p-4 bg-muted/50">
-                <h4 className="font-medium mb-2">Teacher Account Created</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="text-muted-foreground">Name:</div>
-                  <div>{createdCredentials.name}</div>
-                  <div className="text-muted-foreground">Username:</div>
-                  <div className="font-mono">{createdCredentials.username}</div>
-                  <div className="text-muted-foreground">Password:</div>
-                  <div className="font-mono">{createdCredentials.password}</div>
-                  <div className="text-muted-foreground">Email:</div>
-                  <div>{createdCredentials.email}</div>
-                  <div className="text-muted-foreground">Department:</div>
-                  <div>{authState.user?.department}</div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={() => setDialogOpen(false)}>Close</Button>
-              </DialogFooter>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <AddTeacherDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   );
 };

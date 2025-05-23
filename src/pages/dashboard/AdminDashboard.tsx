@@ -2,23 +2,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { GeneratedCredentials, User } from "@/types";
+import { User } from "@/types";
 import { 
   DashboardStats, 
   RecentActivities, 
   QuickActions,
-  AddHODDialog,
   EditHODDialog,
   ManageHODsTable 
 } from "./admin";
+import AddHODDialog from "@/components/dialogs/AddHODDialog";
 import { toast } from "@/components/ui/sonner";
-
-type HODFormValues = {
-  name: string;
-  email: string;
-  password: string;
-  department: string;
-};
 
 type EditHODFormValues = {
   name: string;
@@ -28,7 +21,7 @@ type EditHODFormValues = {
 };
 
 const AdminDashboard: React.FC = () => {
-  const { getUsersByRole, createUser, departments, updateUserProfile } = useAuth();
+  const { getUsersByRole, departments, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -64,16 +57,6 @@ const AdminDashboard: React.FC = () => {
 
   const handleGenerateReports = () => {
     navigate("/admin/reports");
-  };
-
-  const handleSubmitHODForm = (data: HODFormValues): GeneratedCredentials | null => {
-    return createUser({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      department: data.department,
-      role: "hod"
-    });
   };
 
   const handleEditHOD = (hod: User) => {
@@ -133,9 +116,7 @@ const AdminDashboard: React.FC = () => {
 
       <AddHODDialog
         open={addDialogOpen}
-        departments={departments}
         onOpenChange={setAddDialogOpen}
-        onSubmit={handleSubmitHODForm}
       />
 
       <EditHODDialog
