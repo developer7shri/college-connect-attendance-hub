@@ -14,6 +14,7 @@ export interface AuthContextType {
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (user: User) => void;
+  updateUserProfile: (user: User) => void; // Add this function
   createUser: (userRequest: UserCreationRequest) => GeneratedCredentials | null;
   getAllUsers: () => User[];
   getUsersByDepartment: (department: string) => User[];

@@ -1,3 +1,4 @@
+
 // User roles
 export type UserRole = 'admin' | 'hod' | 'teacher' | 'student';
 
@@ -107,4 +108,74 @@ export interface GeneratedCredentials {
   name: string;
   email: string;
   role: UserRole;
+}
+
+// Internal Marks
+export interface InternalMarks {
+  id: string;
+  studentId: string;
+  subjectId: string;
+  firstCI: number; // out of 15
+  secondCI: number; // out of 15
+  assignments: number; // out of 10
+  labInternals: number; // out of 10
+  total: number; // out of 50
+  updatedBy: string;
+  updatedAt: string;
+}
+
+// External Marks
+export interface ExternalMarks {
+  id: string;
+  studentId: string;
+  subjectId: string;
+  marks: number; // out of 50
+  updatedBy: string;
+  updatedAt: string;
+}
+
+// Total Marks
+export interface TotalMarks {
+  studentId: string;
+  subjectId: string;
+  internal: number; // out of 50
+  external: number; // out of 50
+  total: number; // out of 100
+}
+
+// Mentoring Session
+export interface MentoringSession {
+  id: string;
+  mentorId: string;
+  studentId: string;
+  date: string;
+  duration: number; // in minutes
+  notes: string;
+  topics: string[];
+  status: 'scheduled' | 'completed' | 'cancelled';
+}
+
+// Student Progress
+export interface StudentProgress {
+  id: string;
+  studentId: string;
+  academicPerformance: 'excellent' | 'good' | 'average' | 'poor';
+  attendancePercentage: number;
+  achievements: string[];
+  areasOfImprovement: string[];
+  updatedAt: string;
+}
+
+// Student Certificate/Achievement
+export interface StudentAchievement {
+  id: string;
+  studentId: string;
+  title: string;
+  description: string;
+  date: string;
+  certificateUrl: string;
+  verified: boolean;
+  verifiedBy?: string;
+  verifiedAt?: string;
+  uploadedAt: string;
 }
