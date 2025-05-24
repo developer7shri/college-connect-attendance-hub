@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { User, UserRole, GeneratedCredentials, UserCreationRequest } from "@/types";
 import { UserData } from "./types";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 /**
  * Custom hook for user management functionality
@@ -15,22 +15,42 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
     localStorage.setItem("allUsers", JSON.stringify(users));
   };
 
-  // Create a new user (Admin only can create HOD, Teacher, Student)
+  // Create a new user
   const createUser = (
     userRequest: UserCreationRequest,
     currentUser: User | null
   ): GeneratedCredentials | null => {
     if (!currentUser) return null;
 
-    // Only Admin can create users
-    if (currentUser.role !== 'admin') {
-      toast.error("Permission Denied: Only Admin can create users");
-      return null;
-    }
-
-    // Admin can only create HODs, Teachers, and Students (not other admins)
-    if (userRequest.role === 'admin') {
-      toast.error("Permission Denied: Cannot create Admin accounts");
+    // Check permissions: Admin can create all types, HOD can create teachers and students in their department
+    if (currentUser.role === 'admin') {
+      // Admin can create HOD, teachers, and students (but not other admins)
+      if (userRequest.role === 'admin') {
+        toast.error("Permission Denied: Cannot create Admin accounts");
+        return null;
+      }
+    } else if (currentUser.role === 'hod') {
+      // HOD can only create teachers and students in their department
+      if (userRequest.role === 'hod' || userRequest.role === 'admin') {
+        toast.error("Permission Denied: HOD can only create teachers and students");
+        return null;
+      }
+      if (userRequest.department !== currentUser.department) {
+        toast.error("Permission Denied: Can only create users in your department");
+        return null;
+      }
+    } else if (currentUser.role === 'teacher') {
+      // Teachers can only create students in their department
+      if (userRequest.role !== 'student') {
+        toast.error("Permission Denied: Teachers can only create students");
+        return null;
+      }
+      if (userRequest.department !== currentUser.department) {
+        toast.error("Permission Denied: Can only create students in your department");
+        return null;
+      }
+    } else {
+      toast.error("Permission Denied: Insufficient privileges to create users");
       return null;
     }
 
@@ -87,10 +107,16 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
     };
   };
 
-  // Update user profile (Admin only)
+  // Update user profile
   const updateUserProfile = (updatedUser: User, currentUser: User | null) => {
-    if (!currentUser || currentUser.role !== 'admin') {
-      toast.error("Permission Denied: Only Admin can update user profiles");
+    if (!currentUser) {
+      toast.error("Permission Denied: User not authenticated");
+      return;
+    }
+
+    // Check permissions
+    if (currentUser.role !== 'admin' && currentUser.id !== updatedUser.id) {
+      toast.error("Permission Denied: Can only update your own profile");
       return;
     }
 
@@ -109,6 +135,7 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
       };
       setAllUsers(updatedUsers);
       saveUsers(updatedUsers);
+      toast.success("Profile updated successfully");
     }
   };
 

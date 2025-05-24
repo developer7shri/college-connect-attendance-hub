@@ -50,6 +50,9 @@ const Teachers = () => {
     (teacher.phone && teacher.phone.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Check if user can add teachers (admin or HOD)
+  const canAddTeachers = ["admin", "hod"].includes(authState.user?.role || "");
+
   // Handle edit button click
   const handleEditTeacher = (teacher: User) => {
     setSelectedTeacher(teacher);
@@ -89,7 +92,7 @@ const Teachers = () => {
               <TabsTrigger value="cards">Cards</TabsTrigger>
             </TabsList>
           </Tabs>
-          {authState.user?.role === "hod" && (
+          {canAddTeachers && (
             <Button onClick={() => setAddTeacherDialogOpen(true)} className="gap-2">
               <UserPlus className="h-4 w-4" />
               Add Teacher

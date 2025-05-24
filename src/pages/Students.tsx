@@ -48,8 +48,8 @@ const Students = () => {
     (student.semester && student.semester.toString().includes(searchTerm))
   );
 
-  // Check if the current user can add students (teacher or HOD)
-  const canAddStudents = ["teacher", "hod"].includes(authState.user?.role || "");
+  // Check if the current user can add students (admin, teacher or HOD)
+  const canAddStudents = ["admin", "teacher", "hod"].includes(authState.user?.role || "");
 
   // Handle edit button click
   const handleEditStudent = (student: User) => {

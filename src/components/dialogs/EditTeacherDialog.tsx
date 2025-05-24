@@ -7,6 +7,7 @@ import { User } from "@/types";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -92,6 +93,9 @@ export function EditTeacherDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit Teacher Details</DialogTitle>
+          <DialogDescription>
+            Update the teacher's information. Subjects are managed by the HOD.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
