@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthState, User, UserRole, GeneratedCredentials, UserCreationRequest } from "@/types";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { AuthContextType } from "./types";
 import { DUMMY_USERS, DEPARTMENTS } from "./mockData";
 import { useUserManagement } from "./userManagement";
@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading: true,
   });
 
-  const [departments] = useState<string[]>(DEPARTMENTS);
+  const [departments, setDepartments] = useState<string[]>(DEPARTMENTS);
 
   // Initialize user management
   const {
@@ -25,7 +25,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateUserProfile: updateUserProfileInternal,
     getAllUsers,
     getUsersByDepartment,
-    getUsersByRole
+    getUsersByRole,
+    addDepartment: addDepartmentInternal
   } = useUserManagement(DUMMY_USERS);
 
   useEffect(() => {
@@ -67,6 +68,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       // Initialize localStorage with dummy users
       localStorage.setItem("allUsers", JSON.stringify(allUsers));
+    }
+
+    // Load departments from localStorage
+    const storedDepartments = localStorage.getItem("departments");
+    if (storedDepartments) {
+      try {
+        setDepartments(JSON.parse(storedDepartments));
+      } catch (error) {
+        console.error("Error parsing stored departments:", error);
+      }
+    } else {
+      // Initialize localStorage with default departments
+      localStorage.setItem("departments", JSON.stringify(DEPARTMENTS));
     }
   }, []);
 
@@ -138,6 +152,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Add department function
+  const addDepartment = (name: string) => {
+    if (departments.includes(name)) {
+      toast.error("Department already exists");
+      return;
+    }
+    
+    const updatedDepartments = [...departments, name];
+    setDepartments(updatedDepartments);
+    localStorage.setItem("departments", JSON.stringify(updatedDepartments));
+    addDepartmentInternal(name);
+  };
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -150,7 +177,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         getUsersByDepartment,
         getUsersByRole,
         departments,
-        updateUserProfile
+        updateUserProfile,
+        addDepartment
       }}
     >
       {children}

@@ -20,6 +20,7 @@ export interface AuthContextType {
   getUsersByDepartment: (department: string) => User[];
   getUsersByRole: (role: UserRole) => User[];
   departments: string[];
+  addDepartment: (name: string) => void;
 }
 
 // User data structure for storage
