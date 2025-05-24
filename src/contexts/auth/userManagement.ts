@@ -15,6 +15,17 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
     localStorage.setItem("allUsers", JSON.stringify(users));
   };
 
+  // Add department management
+  const addDepartment = (departmentName: string) => {
+    const departments = JSON.parse(localStorage.getItem("departments") || "[]");
+    if (!departments.includes(departmentName)) {
+      departments.push(departmentName);
+      localStorage.setItem("departments", JSON.stringify(departments));
+      return true;
+    }
+    return false;
+  };
+
   // Create a new user
   const createUser = (
     userRequest: UserCreationRequest,
@@ -165,6 +176,7 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
     updateUserProfile,
     getAllUsers,
     getUsersByDepartment,
-    getUsersByRole
+    getUsersByRole,
+    addDepartment
   };
 };

@@ -8,11 +8,15 @@ import { User } from "@/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import AddHODDialog from "@/components/dialogs/AddHODDialog";
+import AddDepartmentDialog from "@/components/dialogs/AddDepartmentDialog";
+import DepartmentDetailsDialog from "@/components/dialogs/DepartmentDetailsDialog";
 
 const Departments = () => {
-  const { departments, getUsersByDepartment, getUsersByRole } = useAuth();
+  const { departments, getUsersByDepartment, getUsersByRole, addDepartment } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [hodDialogOpen, setHodDialogOpen] = useState(false);
+  const [addDeptDialogOpen, setAddDeptDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   
   const allHODs = getUsersByRole("hod");
@@ -37,7 +41,16 @@ const Departments = () => {
   
   const handleAddHOD = (department: string) => {
     setSelectedDepartment(department);
-    setDialogOpen(true);
+    setHodDialogOpen(true);
+  };
+
+  const handleAddDepartment = (name: string) => {
+    addDepartment(name);
+  };
+
+  const handleViewDetails = (department: string) => {
+    setSelectedDepartment(department);
+    setDetailsDialogOpen(true);
   };
 
   return (
@@ -75,13 +88,7 @@ const Departments = () => {
           </svg>
         </div>
         
-        <Button
-          onClick={() => {
-            // Add department functionality would go here
-            // This would typically open a dialog to add a new department
-            alert("Add Department feature would go here");
-          }}
-        >
+        <Button onClick={() => setAddDeptDialogOpen(true)}>
           Add Department
         </Button>
       </div>
@@ -145,10 +152,7 @@ const Departments = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => {
-                      // View department details
-                      alert("View department details");
-                    }}
+                    onClick={() => handleViewDetails(department)}
                   >
                     View Details
                   </Button>
@@ -170,8 +174,22 @@ const Departments = () => {
       
       {/* Add HOD Dialog */}
       <AddHODDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={hodDialogOpen}
+        onOpenChange={setHodDialogOpen}
+      />
+
+      {/* Add Department Dialog */}
+      <AddDepartmentDialog
+        open={addDeptDialogOpen}
+        onOpenChange={setAddDeptDialogOpen}
+        onAddDepartment={handleAddDepartment}
+      />
+
+      {/* Department Details Dialog */}
+      <DepartmentDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        department={selectedDepartment}
       />
     </div>
   );

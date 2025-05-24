@@ -13,7 +13,6 @@ import {
   BookOpen,
   Home,
   QrCode,
-  FileText,
   UserCircle
 } from "lucide-react";
 
@@ -78,12 +77,6 @@ const navItems: NavItem[] = [
     href: "/leave",
     icon: Calendar,
     roles: ["hod", "teacher", "student"],
-  },
-  {
-    label: "Reports",
-    href: "/reports",
-    icon: FileText,
-    roles: ["admin", "hod", "teacher", "student"],
   },
   {
     label: "Profile",

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -20,16 +19,18 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserPlus, UserCog, Search, Phone, Mail, BookOpen, Briefcase } from "lucide-react";
+import { UserPlus, UserCog, Search, Phone, Mail, BookOpen, Briefcase, Settings } from "lucide-react";
 import { User } from "@/types";
 import AddTeacherDialog from "@/components/dialogs/AddTeacherDialog";
 import EditTeacherDialog from "@/components/dialogs/EditTeacherDialog";
+import AssignSubjectsDialog from "@/components/dialogs/AssignSubjectsDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Teachers = () => {
   const { authState, getUsersByRole, getUsersByDepartment } = useAuth();
   const [addTeacherDialogOpen, setAddTeacherDialogOpen] = useState(false);
   const [editTeacherDialogOpen, setEditTeacherDialogOpen] = useState(false);
+  const [assignSubjectsDialogOpen, setAssignSubjectsDialogOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
@@ -52,11 +53,18 @@ const Teachers = () => {
 
   // Check if user can add teachers (admin or HOD)
   const canAddTeachers = ["admin", "hod"].includes(authState.user?.role || "");
+  const canAssignSubjects = authState.user?.role === "hod";
 
   // Handle edit button click
   const handleEditTeacher = (teacher: User) => {
     setSelectedTeacher(teacher);
     setEditTeacherDialogOpen(true);
+  };
+
+  // Handle assign subjects button click
+  const handleAssignSubjects = (teacher: User) => {
+    setSelectedTeacher(teacher);
+    setAssignSubjectsDialogOpen(true);
   };
 
   // Helper function to display subjects
@@ -124,7 +132,7 @@ const Teachers = () => {
                 <TableHead>Department</TableHead>
                 <TableHead>Subjects</TableHead>
                 <TableHead>Phone</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead className="w-[150px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -141,14 +149,26 @@ const Teachers = () => {
                     <TableCell>{displaySubjects(teacher.subjects)}</TableCell>
                     <TableCell>{teacher.phone || "Not available"}</TableCell>
                     <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleEditTeacher(teacher)}
-                      >
-                        <UserCog className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEditTeacher(teacher)}
+                        >
+                          <UserCog className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        {canAssignSubjects && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleAssignSubjects(teacher)}
+                          >
+                            <Settings className="h-4 w-4" />
+                            <span className="sr-only">Assign Subjects</span>
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -191,15 +211,26 @@ const Teachers = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="border-t bg-muted/20 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full" 
-                    onClick={() => handleEditTeacher(teacher)}
-                  >
-                    <UserCog className="mr-2 h-4 w-4" />
-                    Edit Details
-                  </Button>
+                  <div className="flex gap-2 w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1" 
+                      onClick={() => handleEditTeacher(teacher)}
+                    >
+                      <UserCog className="mr-2 h-4 w-4" />
+                      Edit
+                    </Button>
+                    {canAssignSubjects && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleAssignSubjects(teacher)}
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </CardFooter>
               </Card>
             ))
@@ -216,6 +247,14 @@ const Teachers = () => {
         <EditTeacherDialog
           open={editTeacherDialogOpen}
           onOpenChange={setEditTeacherDialogOpen}
+          teacher={selectedTeacher}
+        />
+      )}
+
+      {selectedTeacher && (
+        <AssignSubjectsDialog
+          open={assignSubjectsDialogOpen}
+          onOpenChange={setAssignSubjectsDialogOpen}
           teacher={selectedTeacher}
         />
       )}
