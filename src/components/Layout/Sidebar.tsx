@@ -13,7 +13,9 @@ import {
   BookOpen,
   Home,
   QrCode,
-  UserCircle
+  UserCircle,
+  Bell,
+  FileText
 } from "lucide-react";
 
 interface NavItem {
@@ -34,6 +36,18 @@ const navItems: NavItem[] = [
     label: "Departments",
     href: "/departments",
     icon: BookOpen,
+    roles: ["admin"],
+  },
+  {
+    label: "Notification System",
+    href: "/notifications",
+    icon: Bell,
+    roles: ["admin"],
+  },
+  {
+    label: "Study Material",
+    href: "/study-material",
+    icon: FileText,
     roles: ["admin"],
   },
   {

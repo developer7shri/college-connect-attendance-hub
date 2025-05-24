@@ -38,6 +38,10 @@ import Students from "@/pages/Students";
 import Departments from "@/pages/Departments";
 import Teachers from "@/pages/Teachers";
 
+// New Admin Pages
+import NotificationSystemPage from "@/pages/admin/NotificationSystemPage";
+import StudyMaterialPage from "@/pages/admin/StudyMaterialPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -65,6 +69,8 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
               <Route path="profile" element={<Profile />} />
               <Route path="students" element={<Students />} />
+              <Route path="notifications" element={<NotificationSystemPage />} />
+              <Route path="study-material" element={<StudyMaterialPage />} />
             </Route>
             
             {/* HOD Routes */}
