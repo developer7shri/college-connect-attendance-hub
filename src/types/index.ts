@@ -1,4 +1,3 @@
-
 // User roles
 export type UserRole = 'admin' | 'hod' | 'teacher' | 'student';
 
@@ -11,10 +10,20 @@ export interface User {
   department?: string;
   profileImageUrl?: string;
   phone?: string;
-  subjectName?: string;
-  subjectCode?: string;
+  subjects?: Subject[]; // Array of subjects for teachers
+  classes?: string[]; // Array of class/semester identifiers for teachers
   usn?: string; // USN for students
   semester?: number;
+}
+
+// Subject interface
+export interface Subject {
+  id: string;
+  name: string;
+  code: string;
+  semester: number;
+  department: string;
+  teacherId?: string;
 }
 
 // Authentication state
@@ -39,16 +48,6 @@ export interface Department {
   id: string;
   name: string;
   hodId?: string;
-}
-
-// Subject
-export interface Subject {
-  id: string;
-  name: string;
-  code: string;
-  semester: number;
-  department: string;
-  teacherId?: string;
 }
 
 // Student
@@ -97,21 +96,20 @@ export interface QRCodeData {
 // User Creation Request
 export interface UserCreationRequest {
   name: string;
-  email: string;
-  password?: string;
+  email: string; // This will be used as the user ID
+  phone: string; // This will be used as the initial password
   department: string;
   role: UserRole;
   semester?: number;
-  phone?: string;
-  subjectName?: string;
-  subjectCode?: string;
+  subjects?: Subject[]; // For teachers - multiple subjects
+  classes?: string[]; // For teachers - multiple classes/semesters
   usn?: string;
 }
 
 // Generated Credentials
 export interface GeneratedCredentials {
-  username: string;
-  password: string;
+  username: string; // This will be the email
+  password: string; // This will be the phone number
   name: string;
   email: string;
   role: UserRole;

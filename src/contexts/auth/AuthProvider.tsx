@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     allUsers,
     setAllUsers,
     createUser: createUserInternal,
-    updateUserProfile,
+    updateUserProfile: updateUserProfileInternal,
     getAllUsers,
     getUsersByDepartment,
     getUsersByRole
@@ -123,6 +123,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return createUserInternal(userRequest, authState.user);
   };
 
+  // Wrapper for updateUserProfile to pass current user
+  const updateUserProfile = (updatedUser: User) => {
+    updateUserProfileInternal(updatedUser, authState.user);
+    
+    // If updating current user, also update auth state
+    if (authState.user && authState.user.id === updatedUser.id) {
+      setAuthState({
+        user: updatedUser,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+  };
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -135,7 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         getUsersByDepartment,
         getUsersByRole,
         departments,
-        updateUserProfile // Add this to fix the TS error
+        updateUserProfile
       }}
     >
       {children}

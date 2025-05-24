@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { User, UserRole, GeneratedCredentials, UserCreationRequest } from "@/types";
 import { UserData } from "./types";
-import { generateUsername, generateRandomString } from "./utils";
 import { toast } from "@/components/ui/sonner";
 
 /**
@@ -16,42 +15,36 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
     localStorage.setItem("allUsers", JSON.stringify(users));
   };
 
-  // Create a new user (restricted by current user's role)
+  // Create a new user (Admin only can create HOD, Teacher, Student)
   const createUser = (
     userRequest: UserCreationRequest,
     currentUser: User | null
   ): GeneratedCredentials | null => {
     if (!currentUser) return null;
 
-    // Permission checks
-    if (
-      // Admin can create HODs only
-      (currentUser.role === 'admin' && userRequest.role !== 'hod') ||
-      // HODs can create teachers only in their department
-      (currentUser.role === 'hod' && 
-        (userRequest.role !== 'teacher' || currentUser.department !== userRequest.department)) ||
-      // Teachers can create students only in their department
-      (currentUser.role === 'teacher' && 
-        (userRequest.role !== 'student' || currentUser.department !== userRequest.department)) ||
-      // Students cannot create users
-      currentUser.role === 'student'
-    ) {
-      toast.error("Permission Denied: You don't have permission to create this type of user");
+    // Only Admin can create users
+    if (currentUser.role !== 'admin') {
+      toast.error("Permission Denied: Only Admin can create users");
       return null;
     }
 
-    // Generate username and password
-    const username = generateUsername(userRequest.role, userRequest.name, userRequest.department);
+    // Admin can only create HODs, Teachers, and Students (not other admins)
+    if (userRequest.role === 'admin') {
+      toast.error("Permission Denied: Cannot create Admin accounts");
+      return null;
+    }
+
+    // Use email as username
+    const username = userRequest.email;
     
-    // Check if username already exists
+    // Check if email/username already exists
     if (allUsers[username]) {
-      toast.error("Error Creating User: Username already exists in the system");
+      toast.error("Error Creating User: Email already exists in the system");
       return null;
     }
 
-    // Use provided password or generate a random one
-    const password = userRequest.password || 
-      (userRequest.role === 'student' ? username : generateRandomString(8));
+    // Use phone number as initial password
+    const password = userRequest.phone;
     
     const userId = `${Object.keys(allUsers).length + 1}`;
 
@@ -61,7 +54,14 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
       email: userRequest.email,
       role: userRequest.role,
       department: userRequest.department,
-      profileImageUrl: "/placeholder.svg"
+      phone: userRequest.phone,
+      profileImageUrl: "/placeholder.svg",
+      // Teacher-specific fields
+      subjects: userRequest.subjects || [],
+      classes: userRequest.classes || [],
+      // Student-specific fields
+      usn: userRequest.usn,
+      semester: userRequest.semester,
     };
 
     // Add to our users record
@@ -79,17 +79,22 @@ export const useUserManagement = (initialUsers: Record<string, UserData>) => {
     toast.success(`User Created Successfully: Created ${userRequest.role}: ${userRequest.name}`);
 
     return {
-      username,
-      password,
+      username, // This is the email
+      password, // This is the phone number
       name: userRequest.name,
       email: userRequest.email,
       role: userRequest.role,
     };
   };
 
-  // Update user profile
-  const updateUserProfile = (updatedUser: User) => {
-    // Find the username for the given user ID
+  // Update user profile (Admin only)
+  const updateUserProfile = (updatedUser: User, currentUser: User | null) => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      toast.error("Permission Denied: Only Admin can update user profiles");
+      return;
+    }
+
+    // Find the username (email) for the given user ID
     const username = Object.keys(allUsers).find(
       (key) => allUsers[key].user.id === updatedUser.id
     );

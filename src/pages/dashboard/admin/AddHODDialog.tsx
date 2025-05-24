@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Dialog, 
   DialogContent, 
@@ -37,8 +38,8 @@ const hodFormSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
+  phone: z.string().min(10, {
+    message: "Phone number must be at least 10 digits.",
   }),
   department: z.string().min(1, {
     message: "Please select a department.",
@@ -49,17 +50,14 @@ type HODFormValues = z.infer<typeof hodFormSchema>;
 
 interface AddHODDialogProps {
   open: boolean;
-  departments: string[];
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: HODFormValues) => GeneratedCredentials | null;
 }
 
 const AddHODDialog: React.FC<AddHODDialogProps> = ({ 
   open, 
-  departments, 
-  onOpenChange, 
-  onSubmit 
+  onOpenChange
 }) => {
+  const { createUser, departments } = useAuth();
   const [createdCredentials, setCreatedCredentials] = useState<GeneratedCredentials | null>(null);
 
   const form = useForm<HODFormValues>({
@@ -67,13 +65,20 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
     defaultValues: {
       name: "",
       email: "",
-      password: "",
+      phone: "",
       department: "",
     },
   });
 
   const handleSubmit = (data: HODFormValues) => {
-    const credentials = onSubmit(data);
+    const credentials = createUser({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      department: data.department,
+      role: "hod"
+    });
+    
     if (credentials) {
       setCreatedCredentials(credentials);
     }
@@ -97,7 +102,7 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Add New HOD</DialogTitle>
           <DialogDescription>
-            Create a new Head of Department account. The system will generate credentials.
+            Create a new Head of Department account. Login ID will be email, initial password will be phone number.
           </DialogDescription>
         </DialogHeader>
 
@@ -122,7 +127,7 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email (Login ID)</FormLabel>
                     <FormControl>
                       <Input placeholder="hod@scahts.edu" {...field} />
                     </FormControl>
@@ -132,12 +137,12 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
               />
               <FormField
                 control={form.control}
-                name="password"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Phone Number (Initial Password)</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Enter password" {...field} />
+                      <Input placeholder="9876543210" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -180,14 +185,15 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="text-muted-foreground">Name:</div>
                 <div>{createdCredentials.name}</div>
-                <div className="text-muted-foreground">Username:</div>
+                <div className="text-muted-foreground">Login ID (Email):</div>
                 <div className="font-mono">{createdCredentials.username}</div>
-                <div className="text-muted-foreground">Password:</div>
+                <div className="text-muted-foreground">Initial Password:</div>
                 <div className="font-mono">{createdCredentials.password}</div>
-                <div className="text-muted-foreground">Email:</div>
-                <div>{createdCredentials.email}</div>
                 <div className="text-muted-foreground">Department:</div>
                 <div>{form.getValues().department}</div>
+              </div>
+              <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                <strong>Note:</strong> User should change password after first login
               </div>
             </div>
             <DialogFooter>

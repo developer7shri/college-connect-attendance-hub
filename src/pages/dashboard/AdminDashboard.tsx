@@ -10,7 +10,7 @@ import {
   EditHODDialog,
   ManageHODsTable 
 } from "./admin";
-import AddHODDialog from "@/components/dialogs/AddHODDialog";
+import AddHODDialog from "./admin/AddHODDialog";
 import { toast } from "@/components/ui/sonner";
 
 type EditHODFormValues = {
