@@ -48,11 +48,13 @@ const Students = () => {
     (student.semester && student.semester.toString().includes(searchTerm))
   );
 
-  // Check if the current user can add students (admin, teacher or HOD)
-  const canAddStudents = ["admin", "teacher", "hod"].includes(authState.user?.role || "");
+  // Only admin can add/edit students
+  const canAddStudents = authState.user?.role === "admin";
+  const canEditStudents = authState.user?.role === "admin";
 
   // Handle edit button click
   const handleEditStudent = (student: User) => {
+    if (!canEditStudents) return;
     setSelectedStudent(student);
     setEditStudentDialogOpen(true);
   };
@@ -63,7 +65,10 @@ const Students = () => {
         <div>
           <h1 className="text-3xl font-bold">Students</h1>
           <p className="text-muted-foreground">
-            Manage students, view their details, and monitor their academic progress.
+            {authState.user?.role === "admin" 
+              ? "Manage students, view their details, and monitor their academic progress."
+              : "View students in your department and monitor their academic progress."
+            }
           </p>
         </div>
         <div className="flex gap-2">
@@ -106,13 +111,13 @@ const Students = () => {
                 <TableHead>Department</TableHead>
                 <TableHead>Semester</TableHead>
                 <TableHead>Phone</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                {canEditStudents && <TableHead className="w-[100px]">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {students.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">No students found</TableCell>
+                  <TableCell colSpan={canEditStudents ? 7 : 6} className="text-center">No students found</TableCell>
                 </TableRow>
               ) : (
                 students.map((student: User) => (
@@ -123,12 +128,14 @@ const Students = () => {
                     <TableCell>{student.department}</TableCell>
                     <TableCell>{student.semester || "Not available"}</TableCell>
                     <TableCell>{student.phone || "Not available"}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => handleEditStudent(student)}>
-                        <UserCog className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                    </TableCell>
+                    {canEditStudents && (
+                      <TableCell>
+                        <Button variant="ghost" size="sm" onClick={() => handleEditStudent(student)}>
+                          <UserCog className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}
@@ -173,15 +180,21 @@ const Students = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="border-t bg-muted/20 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full" 
-                    onClick={() => handleEditStudent(student)}
-                  >
-                    <UserCog className="mr-2 h-4 w-4" />
-                    Edit Details
-                  </Button>
+                  {canEditStudents ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full" 
+                      onClick={() => handleEditStudent(student)}
+                    >
+                      <UserCog className="mr-2 h-4 w-4" />
+                      Edit Details
+                    </Button>
+                  ) : (
+                    <div className="w-full text-center text-sm text-muted-foreground">
+                      View Only
+                    </div>
+                  )}
                 </CardFooter>
               </Card>
             ))
@@ -189,12 +202,14 @@ const Students = () => {
         </div>
       )}
 
-      <AddStudentDialog
-        open={addStudentDialogOpen}
-        onOpenChange={setAddStudentDialogOpen}
-      />
+      {canAddStudents && (
+        <AddStudentDialog
+          open={addStudentDialogOpen}
+          onOpenChange={setAddStudentDialogOpen}
+        />
+      )}
       
-      {selectedStudent && (
+      {selectedStudent && canEditStudents && (
         <EditStudentDialog
           open={editStudentDialogOpen}
           onOpenChange={setEditStudentDialogOpen}

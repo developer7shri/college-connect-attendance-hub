@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,16 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, 
   Calendar, 
-  MessageSquare, 
   Award, 
   TrendingUp, 
   Clock,
-  BookOpen,
   CheckCircle,
   AlertCircle,
-  Star
+  Star,
+  Search
 } from "lucide-react";
-import { TotalMarks } from "@/types"; // Added missing import
 
 const TeacherMentoring = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,7 +53,7 @@ const TeacherMentoring = () => {
     },
   ];
 
-  // Dummy data for mentoring sessions (replace with actual data fetching)
+  // Dummy data for mentoring sessions
   const mentoringSessions = [
     {
       id: "1",
@@ -82,7 +81,7 @@ const TeacherMentoring = () => {
     },
   ];
 
-  // Dummy data for student achievements (replace with actual data fetching)
+  // Dummy data for student achievements
   const studentAchievements = [
     {
       id: "1",
@@ -125,20 +124,7 @@ const TeacherMentoring = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 absolute left-3 top-3 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Search className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
         </div>
       </div>
 
@@ -157,6 +143,7 @@ const TeacherMentoring = () => {
             Achievements
           </TabsTrigger>
         </TabsList>
+        
         <TabsContent value="students" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStudents.map((student) => (
@@ -187,9 +174,9 @@ const TeacherMentoring = () => {
                     <Calendar className="h-4 w-4 text-gray-500" />
                     <span>Last Session: {student.lastSession}</span>
                   </div>
-                </CardContent>
-                <CardContent className="flex justify-end">
-                  <Button variant="outline">View Details</Button>
+                  <div className="flex justify-end mt-4">
+                    <Button variant="outline">View Details</Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -203,11 +190,11 @@ const TeacherMentoring = () => {
               <CardDescription>List of all mentoring sessions</CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="list-none space-y-2">
+              <div className="space-y-4">
                 {mentoringSessions.map((session) => {
                   const student = students.find((s) => s.id === session.studentId);
                   return (
-                    <li key={session.id} className="border rounded-md p-4">
+                    <div key={session.id} className="border rounded-md p-4">
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-semibold">{student?.name}</h3>
@@ -220,22 +207,22 @@ const TeacherMentoring = () => {
                         </div>
                         <div>
                           {session.status === "completed" ? (
-                            <Badge variant="outline" className="space-x-2">
+                            <Badge variant="outline" className="flex items-center gap-2">
                               <CheckCircle className="h-4 w-4" />
                               <span>Completed</span>
                             </Badge>
                           ) : (
-                            <Badge variant="destructive" className="space-x-2">
+                            <Badge variant="destructive" className="flex items-center gap-2">
                               <AlertCircle className="h-4 w-4" />
                               <span>{session.status}</span>
                             </Badge>
                           )}
                         </div>
                       </div>
-                    </li>
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -247,11 +234,11 @@ const TeacherMentoring = () => {
               <CardDescription>List of student achievements and certificates</CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="list-none space-y-4">
+              <div className="space-y-4">
                 {studentAchievements.map((achievement) => {
                   const student = students.find((s) => s.id === achievement.studentId);
                   return (
-                    <li key={achievement.id} className="border rounded-md p-4">
+                    <div key={achievement.id} className="border rounded-md p-4">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-semibold">{achievement.title}</h3>
@@ -268,10 +255,10 @@ const TeacherMentoring = () => {
                         </div>
                         <Button variant="outline">View Certificate</Button>
                       </div>
-                    </li>
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

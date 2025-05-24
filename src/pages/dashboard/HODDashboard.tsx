@@ -1,16 +1,13 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, UserCheck, UserPlus, Calendar, CheckSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import AddTeacherDialog from "@/components/dialogs/AddTeacherDialog";
 
 const HODDashboard: React.FC = () => {
   const { authState, getUsersByDepartment } = useAuth();
   const navigate = useNavigate();
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   // This would be fetched from API in a real application
   const dashboardStats = {
@@ -19,10 +16,6 @@ const HODDashboard: React.FC = () => {
     teachersPresent: 10,
     teachersAbsent: 2,
     pendingLeaves: 5,
-  };
-
-  const handleAddTeacher = () => {
-    setDialogOpen(true);
   };
 
   const handleMarkTeacherAttendance = () => {
@@ -37,12 +30,16 @@ const HODDashboard: React.FC = () => {
     navigate("/hod/students");
   };
 
+  const handleManageTeachers = () => {
+    navigate("/hod/teachers");
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">HOD Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome to SCAHTS HOD dashboard. Manage teachers, students, and department activities.
+          Welcome to SCAHTS HOD dashboard. Manage department activities and oversee academic operations.
         </p>
       </div>
 
@@ -114,10 +111,10 @@ const HODDashboard: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               {[
-                { action: "Added new teacher", subject: "Data Structures", time: "2 hours ago" },
-                { action: "Approved leave request", subject: "Prof. Sharma", time: "5 hours ago" },
+                { action: "Assigned subjects to teacher", subject: "Prof. Sharma", time: "2 hours ago" },
+                { action: "Approved leave request", subject: "Prof. Kumar", time: "5 hours ago" },
                 { action: "Updated timetable", subject: "Semester 4", time: "1 day ago" },
-                { action: "Completed teacher attendance", subject: "Today's record", time: "2 days ago" },
+                { action: "Reviewed teacher attendance", subject: "Today's record", time: "2 days ago" },
               ].map((activity, index) => (
                 <div key={index} className="flex justify-between items-center">
                   <div>
@@ -143,10 +140,10 @@ const HODDashboard: React.FC = () => {
               <Button 
                 variant="outline" 
                 className="justify-start"
-                onClick={handleAddTeacher}
+                onClick={handleManageTeachers}
               >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add New Teacher
+                <Users className="mr-2 h-4 w-4" />
+                Manage Teachers
               </Button>
               <Button 
                 variant="outline" 
@@ -170,18 +167,12 @@ const HODDashboard: React.FC = () => {
                 onClick={handleManageStudents}
               >
                 <Users className="mr-2 h-4 w-4" />
-                Manage Students
+                View Students
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Add Teacher Dialog */}
-      <AddTeacherDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      />
     </div>
   );
 };

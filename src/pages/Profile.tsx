@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,16 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Mail, Phone, MapPin, Building, BookOpen, Calendar, Upload } from "lucide-react";
+import { Mail, Phone, Building, BookOpen, Calendar, Key } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import ChangePasswordDialog from "@/components/dialogs/ChangePasswordDialog";
 
 const Profile = () => {
   const { authState } = useAuth();
   const { user } = authState;
   
   const [editMode, setEditMode] = useState(false);
+  const [changePasswordDialogOpen, setChangePasswordDialogOpen] = useState(false);
   const [bioText, setBioText] = useState(
     user?.role === "student" 
       ? "Dedicated student passionate about learning and growth. Active participant in classroom activities and eager to expand knowledge through practical applications." 
@@ -33,9 +33,9 @@ const Profile = () => {
       ? "Bachelor of Technology - Computer Science" 
       : "Ph.D in Computer Science - Stanford University"
   });
-  
-  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Only admin can edit profiles, others can only change password
+  const canEditProfile = authState.user?.role === "admin";
 
   if (!user) return null;
 
@@ -50,7 +50,7 @@ const Profile = () => {
   const getRandomActivity = () => {
     const activities = [
       "Updated attendance record",
-      "Submitted a leave request",
+      "Submitted a leave request", 
       "Attended a mentoring session",
       "Viewed class schedule",
       "Downloaded attendance report"
@@ -69,6 +69,10 @@ const Profile = () => {
   }));
 
   const handleEditProfile = () => {
+    if (!canEditProfile) {
+      toast.error("Only administrators can edit profile information");
+      return;
+    }
     setEditMode(true);
   };
 
@@ -89,29 +93,12 @@ const Profile = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
-
-  const handleAvatarUpload = () => {
-    if (selectedFile) {
-      // In a real app, this would upload the file to a server
-      toast.success("Avatar updated successfully");
-      setIsAvatarDialogOpen(false);
-      setSelectedFile(null);
-    } else {
-      toast.error("Please select a file first");
-    }
-  };
-
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Your Profile</h1>
         <p className="text-muted-foreground">
-          View and manage your profile information.
+          View your profile information and manage your account settings.
         </p>
       </div>
 
@@ -127,63 +114,27 @@ const Profile = () => {
                 <h2 className="text-xl font-semibold mb-1">{user.name}</h2>
                 <Badge className="mb-2">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</Badge>
                 <p className="text-muted-foreground text-sm mb-4">{user.email}</p>
-                <Button 
-                  variant="outline" 
-                  className="w-full mb-2"
-                  onClick={handleEditProfile}
-                >
-                  Edit Profile
-                </Button>
                 
-                <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="secondary"
+                <div className="w-full space-y-2">
+                  {canEditProfile && (
+                    <Button 
+                      variant="outline" 
                       className="w-full"
+                      onClick={handleEditProfile}
                     >
-                      Change Avatar
+                      Edit Profile
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Change Profile Picture</DialogTitle>
-                      <DialogDescription>
-                        Upload a new profile picture. Files should be JPG, PNG or GIF and less than 2MB.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-16 w-16">
-                          {selectedFile ? (
-                            <AvatarImage
-                              src={URL.createObjectURL(selectedFile)}
-                              alt="Preview"
-                            />
-                          ) : (
-                            <>
-                              <AvatarImage src={user.profileImageUrl} alt={user.name} />
-                              <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                            </>
-                          )}
-                        </Avatar>
-                        <div className="flex-1">
-                          <Input
-                            id="picture"
-                            type="file"
-                            onChange={handleFileChange}
-                            accept="image/*"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsAvatarDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleAvatarUpload}>Upload</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                  )}
+                  
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => setChangePasswordDialogOpen(true)}
+                  >
+                    <Key className="mr-2 h-4 w-4" />
+                    Change Password
+                  </Button>
+                </div>
               </div>
 
               <Separator className="my-6" />
@@ -195,7 +146,7 @@ const Profile = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  {editMode ? (
+                  {editMode && canEditProfile ? (
                     <Input
                       id="phone"
                       className="h-8 text-sm"
@@ -212,7 +163,7 @@ const Profile = () => {
                     <span className="text-sm">{user.department} Department</span>
                   </div>
                 )}
-                {editMode && (
+                {editMode && canEditProfile && (
                   <div className="mt-4">
                     <Button onClick={handleSaveProfile} size="sm" className="w-full">
                       Save Changes
@@ -228,10 +179,12 @@ const Profile = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>About Me</CardTitle>
-              <CardDescription>Your personal bio and information</CardDescription>
+              <CardDescription>
+                {canEditProfile ? "Your personal bio and information" : "Personal bio and information (read-only)"}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              {editMode ? (
+              {editMode && canEditProfile ? (
                 <Textarea
                   className="mb-4"
                   value={bioText}
@@ -250,7 +203,7 @@ const Profile = () => {
                     <BookOpen className="h-4 w-4 text-primary" />
                     <h3 className="font-medium">Education</h3>
                   </div>
-                  {editMode ? (
+                  {editMode && canEditProfile ? (
                     <Input
                       id="education"
                       className="h-8 text-sm"
@@ -270,6 +223,15 @@ const Profile = () => {
                   <p className="text-sm">August 2022</p>
                 </div>
               </div>
+
+              {!canEditProfile && (
+                <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    Profile information can only be edited by administrators. 
+                    You can change your password using the button above.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -294,6 +256,11 @@ const Profile = () => {
           </Card>
         </div>
       </div>
+
+      <ChangePasswordDialog
+        open={changePasswordDialogOpen}
+        onOpenChange={setChangePasswordDialogOpen}
+      />
     </div>
   );
 };
