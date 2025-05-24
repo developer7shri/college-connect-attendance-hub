@@ -33,8 +33,6 @@ const formSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   phone: z.string().optional(),
-  subjectName: z.string().optional(),
-  subjectCode: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,8 +56,6 @@ export function EditTeacherDialog({
       name: teacher?.name || "",
       email: teacher?.email || "",
       phone: teacher?.phone || "",
-      subjectName: teacher?.subjectName || "",
-      subjectCode: teacher?.subjectCode || "",
     },
   });
 
@@ -70,8 +66,6 @@ export function EditTeacherDialog({
         name: teacher.name || "",
         email: teacher.email || "",
         phone: teacher.phone || "",
-        subjectName: teacher.subjectName || "",
-        subjectCode: teacher.subjectCode || "",
       });
     }
   }, [teacher, form]);
@@ -83,8 +77,6 @@ export function EditTeacherDialog({
         name: data.name,
         email: data.email,
         phone: data.phone || undefined,
-        subjectName: data.subjectName || undefined,
-        subjectCode: data.subjectCode || undefined,
       };
       
       updateUserProfile(updatedTeacher);
@@ -146,33 +138,24 @@ export function EditTeacherDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="subjectName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Computer Science" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="bg-muted/30 p-4 rounded-md">
+              <h4 className="font-medium mb-2">Assigned Subjects</h4>
+              {teacher?.subjects && teacher.subjects.length > 0 ? (
+                <div className="space-y-2">
+                  {teacher.subjects.map((subject, index) => (
+                    <div key={index} className="text-sm">
+                      <span className="font-medium">{subject.name}</span>
+                      <span className="text-muted-foreground ml-2">({subject.code})</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No subjects assigned yet</p>
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name="subjectCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject Code</FormLabel>
-                  <FormControl>
-                    <Input placeholder="CS101" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <p className="text-xs text-muted-foreground mt-2">
+                Subjects are managed by the HOD
+              </p>
+            </div>
 
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>

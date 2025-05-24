@@ -40,15 +40,12 @@ const hodFormSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
   department: z.string().min(1, {
     message: "Please select a department.",
   }),
   phone: z.string().min(10, {
     message: "Phone number must be at least 10 digits.",
-  }).optional(),
+  }),
 });
 
 type HODFormValues = z.infer<typeof hodFormSchema>;
@@ -71,7 +68,6 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
     defaultValues: {
       name: "",
       email: "",
-      password: "",
       department: "",
       phone: "",
     },
@@ -81,7 +77,6 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
     const credentials = createUser({
       name: data.name,
       email: data.email,
-      password: data.password,
       department: data.department,
       phone: data.phone,
       role: "hod"
@@ -116,7 +111,7 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="text-2xl">Add New HOD</DialogTitle>
           <DialogDescription>
-            Create a new Head of Department account. The system will generate credentials.
+            Create a new Head of Department account. Login ID will be the email and initial password will be the phone number.
           </DialogDescription>
         </DialogHeader>
 
@@ -142,7 +137,7 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email (Login ID)</FormLabel>
                       <FormControl>
                         <Input placeholder="hod@scahts.edu" {...field} className="bg-background" />
                       </FormControl>
@@ -155,7 +150,7 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                      <FormLabel>Phone (Initial Password)</FormLabel>
                       <FormControl>
                         <Input placeholder="1234567890" {...field} className="bg-background" />
                       </FormControl>
@@ -164,19 +159,6 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Enter password" {...field} className="bg-background" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="department"
@@ -225,16 +207,16 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="text-muted-foreground font-medium">Name:</div>
                 <div>{createdCredentials.name}</div>
-                <div className="text-muted-foreground font-medium">Username:</div>
+                <div className="text-muted-foreground font-medium">Login ID:</div>
                 <div className="font-mono bg-muted p-1 rounded">{createdCredentials.username}</div>
-                <div className="text-muted-foreground font-medium">Password:</div>
+                <div className="text-muted-foreground font-medium">Initial Password:</div>
                 <div className="font-mono bg-muted p-1 rounded">{createdCredentials.password}</div>
                 <div className="text-muted-foreground font-medium">Email:</div>
                 <div>{createdCredentials.email}</div>
                 <div className="text-muted-foreground font-medium">Department:</div>
                 <div>{form.getValues().department}</div>
                 <div className="text-muted-foreground font-medium">Phone:</div>
-                <div>{form.getValues().phone || "Not provided"}</div>
+                <div>{form.getValues().phone}</div>
               </div>
             </div>
             <DialogFooter>

@@ -43,8 +43,10 @@ const Teachers = () => {
   const teachers = allTeachers.filter(teacher => 
     teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (teacher.subjectName && teacher.subjectName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (teacher.subjectCode && teacher.subjectCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (teacher.subjects && teacher.subjects.some(subject => 
+      subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.code.toLowerCase().includes(searchTerm.toLowerCase())
+    )) ||
     (teacher.phone && teacher.phone.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -52,6 +54,23 @@ const Teachers = () => {
   const handleEditTeacher = (teacher: User) => {
     setSelectedTeacher(teacher);
     setEditTeacherDialogOpen(true);
+  };
+
+  // Helper function to display subjects
+  const displaySubjects = (subjects?: Array<{name: string; code: string}>) => {
+    if (!subjects || subjects.length === 0) {
+      return <span className="text-muted-foreground">Not assigned</span>;
+    }
+    return (
+      <div className="space-y-1">
+        {subjects.map((subject, index) => (
+          <div key={index} className="text-sm">
+            {subject.name}
+            <span className="text-xs text-muted-foreground ml-1">({subject.code})</span>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -100,7 +119,7 @@ const Teachers = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Department</TableHead>
-                <TableHead>Subject</TableHead>
+                <TableHead>Subjects</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
@@ -116,16 +135,7 @@ const Teachers = () => {
                     <TableCell className="font-medium">{teacher.name}</TableCell>
                     <TableCell>{teacher.email}</TableCell>
                     <TableCell>{teacher.department}</TableCell>
-                    <TableCell>
-                      {teacher.subjectName ? (
-                        <>
-                          {teacher.subjectName}
-                          {teacher.subjectCode && <span className="text-xs text-muted-foreground ml-1">({teacher.subjectCode})</span>}
-                        </>
-                      ) : (
-                        <span className="text-muted-foreground">Not assigned</span>
-                      )}
-                    </TableCell>
+                    <TableCell>{displaySubjects(teacher.subjects)}</TableCell>
                     <TableCell>{teacher.phone || "Not available"}</TableCell>
                     <TableCell>
                       <Button 
@@ -172,8 +182,8 @@ const Teachers = () => {
                       <span className="text-muted-foreground">{teacher.phone || "No phone number"}</span>
                     </div>
                     <div className="mt-2 py-2 px-3 bg-primary/5 rounded-md text-sm">
-                      <span className="font-medium">Subject:</span> {teacher.subjectName || "Not assigned"}
-                      {teacher.subjectCode && <span className="text-xs ml-1">({teacher.subjectCode})</span>}
+                      <span className="font-medium">Subjects:</span>
+                      <div className="mt-1">{displaySubjects(teacher.subjects)}</div>
                     </div>
                   </div>
                 </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,9 @@ const studentFormSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
+  phone: z.string().min(10, {
+    message: "Phone number must be at least 10 digits.",
+  }),
   semester: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 8, {
     message: "Semester must be between 1 and 8.",
   }),
@@ -41,6 +43,7 @@ const TeacherDashboard: React.FC = () => {
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
       semester: "1",
     },
   });
@@ -60,6 +63,7 @@ const TeacherDashboard: React.FC = () => {
     const credentials = createUser({
       name: data.name,
       email: data.email,
+      phone: data.phone,
       department: authState.user.department,
       role: "student",
       semester: Number(data.semester),
@@ -241,7 +245,7 @@ const TeacherDashboard: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Add New Student</DialogTitle>
             <DialogDescription>
-              Create a new student account for your department. The system will generate credentials.
+              Create a new student account for your department. Login ID will be the email and initial password will be the phone number.
             </DialogDescription>
           </DialogHeader>
 
@@ -266,9 +270,22 @@ const TeacherDashboard: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email (Login ID)</FormLabel>
                       <FormControl>
                         <Input placeholder="student@scahts.edu" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone (Initial Password)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="1234567890" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -311,12 +328,14 @@ const TeacherDashboard: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="text-muted-foreground">Name:</div>
                   <div>{createdCredentials.name}</div>
-                  <div className="text-muted-foreground">USN/Username:</div>
+                  <div className="text-muted-foreground">Login ID:</div>
                   <div className="font-mono">{createdCredentials.username}</div>
-                  <div className="text-muted-foreground">Password:</div>
+                  <div className="text-muted-foreground">Initial Password:</div>
                   <div className="font-mono">{createdCredentials.password}</div>
                   <div className="text-muted-foreground">Email:</div>
                   <div>{createdCredentials.email}</div>
+                  <div className="text-muted-foreground">Phone:</div>
+                  <div>{form.getValues().phone}</div>
                   <div className="text-muted-foreground">Department:</div>
                   <div>{authState.user?.department}</div>
                   <div className="text-muted-foreground">Semester:</div>
