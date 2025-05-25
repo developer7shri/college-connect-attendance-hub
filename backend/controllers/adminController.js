@@ -302,6 +302,19 @@ const sendBulkNotificationAdmin = async (req, res) => {
   } catch (error) { res.status(500).json({ message: 'Server error sending Admin bulk notification.', error: error.message });}
 };
 
+// @desc    Get all users (admin)
+// @route   GET /api/admin/users 
+// @access  Private/Admin
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.json(users);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error when fetching users');
+  }
+};
+
 module.exports = {
   createDepartment, getDepartments, getDepartmentById, updateDepartment, deleteDepartment,
   createSemester, getSemesters, getSemestersByDepartment, getSemesterById, updateSemester, deleteSemester,
@@ -309,6 +322,7 @@ module.exports = {
   uploadStudyMaterialByAdmin, getAllStudyMaterialsAdmin, updateStudyMaterialByAdmin, deleteStudyMaterialByAdmin,
   viewStudentMarksAdmin,
   sendBulkNotificationAdmin,
+  getAllUsers, // Added getAllUsers to exports
 
   // --- Mentoring System Management by Admin ---
 

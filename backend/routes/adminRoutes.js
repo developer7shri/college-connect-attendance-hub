@@ -29,6 +29,7 @@ const {
   // Mentoring System by Admin
   assignMentorToStudent,
   bulkAssignMenteesToMentor,
+  getAllUsers, // Added getAllUsers
 } = require('../controllers/adminController');
 
 const { protect, authorize } = require('../middleware/authMiddleware');
@@ -102,5 +103,10 @@ router
 router
   .route('/mentoring/bulk-assign-mentees')
   .post(protect, authorize('Admin'), bulkAssignMenteesToMentor);
+
+// @route   GET /api/admin/users
+// @desc    Get all users
+// @access  Private/Admin
+router.get('/users', protect, authorize('Admin'), getAllUsers);
 
 module.exports = router;

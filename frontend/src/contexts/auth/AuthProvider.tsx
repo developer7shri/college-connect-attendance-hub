@@ -2,7 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthState, User, UserRole, GeneratedCredentials, UserCreationRequest } from "@/types";
 import { toast } from "sonner";
-import { AuthContextType } from "./types";
+import { AuthContextType, UpdatePasswordData } from "./types"; // Imported UpdatePasswordData
+import apiClient from '../../lib/api';
 import { DUMMY_USERS, DEPARTMENTS } from "./mockData";
 import { useUserManagement } from "./userManagement";
 
@@ -30,31 +31,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   } = useUserManagement(DUMMY_USERS);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    const storedUserJSON = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+
+    if (storedUserJSON && storedToken) { // Check for both user and token
       try {
-        const user = JSON.parse(storedUser);
+        const user = JSON.parse(storedUserJSON);
         setAuthState({
           user,
-          isAuthenticated: true,
+          isAuthenticated: true, // User and token exist
           isLoading: false,
         });
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("user");
-        setAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
+        localStorage.removeItem("token"); // Clear token if user data is corrupted
+        setAuthState({ user: null, isAuthenticated: false, isLoading: false });
       }
     } else {
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
+      // If either user or token is missing, consider the user logged out
+      localStorage.removeItem("user"); // Clean up inconsistent storage
+      localStorage.removeItem("token");
+      setAuthState({ user: null, isAuthenticated: false, isLoading: false });
     }
 
     // Load users from localStorage if any
@@ -84,33 +82,182 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    // Check if user exists in dummy data
-    const userData = allUsers[username];
-    
-    if (userData && userData.password === password) {
-      // Login successful
-      const { user } = userData;
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      
-      // Store user in localStorage
-      localStorage.setItem("user", JSON.stringify(user));
-      return true;
+  // useEffect to fetch all users if current user is Admin
+  useEffect(() => {
+    const loadUsersForAdmin = async () => {
+      if (authState.user && authState.isAuthenticated && authState.user.role === 'Admin') {
+        setAuthState(prevState => ({ ...prevState, isLoading: true }));
+        try {
+          const response = await apiClient.get<User[]>('/admin/users');
+          const usersRecord = Object.fromEntries(
+            response.data.map(u => [u.email, { user: u }]) // password field is omitted as it's not sent by API
+          );
+          setAllUsers(usersRecord); // Update the shared user list
+          // localStorage.setItem("allUsers", JSON.stringify(usersRecord)); // Persist admin-fetched users
+          toast.success("All users loaded for Admin.");
+        } catch (error: any) {
+          console.error("Error fetching all users for admin:", error);
+          toast.error(error.response?.data?.message || "Failed to fetch users for admin.");
+        } finally {
+          setAuthState(prevState => ({ ...prevState, isLoading: false }));
+        }
+      } else if (!authState.isAuthenticated || (authState.user && authState.user.role !== 'Admin')) {
+        // If user logs out or is not an admin, revert to DUMMY_USERS
+        // DUMMY_USERS is an array of User objects.
+        // DUMMY_PASSWORDS is a Record<string, string> (email -> password)
+        // The state 'allUsers' from useUserManagement is Record<string, { user: User; password?: string }>
+        const dummyUsersRecord = Object.fromEntries(
+          DUMMY_USERS.map(u => [u.email, { user: u, password: DUMMY_PASSWORDS[u.email] }])
+        );
+        setAllUsers(dummyUsersRecord);
+        // localStorage.setItem("allUsers", JSON.stringify(dummyUsersRecord)); // Persist dummy users
+      }
+    };
+
+    if (authState.isAuthenticated !== null) { // Ensure initial auth check is done
+        loadUsersForAdmin();
     }
-    
-    return false;
+  }, [authState.user, authState.isAuthenticated, setAllUsers]);
+
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setAuthState(prevState => ({ ...prevState, isLoading: true }));
+    try {
+      const response = await apiClient.post('/auth/login', { email, password });
+      // Assuming backend returns token and user object directly in response.data
+      const { token, ...apiUser } = response.data; 
+
+      if (token && apiUser && apiUser._id) { // Check for token and essential user identifier
+        localStorage.setItem('token', token);
+
+        // Map backend user fields to frontend User type
+        const frontendUser: User = {
+          id: apiUser._id,
+          name: `${apiUser.firstName} ${apiUser.lastName}`,
+          email: apiUser.email,
+          role: apiUser.role,
+          firstName: apiUser.firstName,
+          lastName: apiUser.lastName,
+          department: apiUser.department,
+          phone: apiUser.phoneNumber,
+          usn: apiUser.usn,
+          semester: apiUser.semester,
+          isPasswordDefault: apiUser.isPasswordDefault,
+          createdAt: apiUser.createdAt,
+          updatedAt: apiUser.updatedAt,
+          // profileImageUrl, subjects, classes are not in login response
+        };
+
+        localStorage.setItem('user', JSON.stringify(frontendUser));
+        
+        setAuthState({
+          user: frontendUser,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        toast.success('Login successful!');
+        return true;
+      } else {
+        // Handle cases where response might not be as expected
+        toast.error('Login failed: Invalid response from server.');
+        setAuthState({ user: null, isAuthenticated: false, isLoading: false });
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      toast.error(errorMessage);
+      setAuthState({ user: null, isAuthenticated: false, isLoading: false });
+      localStorage.removeItem('token'); // Clear token on failed login
+      localStorage.removeItem('user');  // Clear user data on failed login
+      return false;
+    } finally {
+      setAuthState(prevState => ({ ...prevState, isLoading: false }));
+    }
+  };
+
+  const updatePassword = async (data: UpdatePasswordData): Promise<boolean> => {
+    if (!authState.isAuthenticated || !authState.user) {
+      toast.error("You must be logged in to update your password.");
+      return false;
+    }
+    // Optional: Add client-side validation for newPassword length if desired,
+    // though the backend also validates it.
+    // if (data.newPassword.length < 6) {
+    //   toast.error("New password must be at least 6 characters long.");
+    //   return false;
+    // }
+
+    setAuthState(prevState => ({ ...prevState, isLoading: true })); // Or a more specific loading state like isUpdatingPassword
+    try {
+      const response = await apiClient.put('/auth/update-password', {
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
+      });
+
+      if (response.status === 200 && response.data?.message) {
+        toast.success(response.data.message || 'Password updated successfully!');
+        // If isPasswordDefault was part of user state and backend confirms it's now false, update it.
+        // This requires the backend to send back the updated user or a confirmation.
+        // For now, we assume the user object in authState might have an isPasswordDefault flag.
+        if (authState.user && authState.user.isPasswordDefault) {
+          const updatedUser = { ...authState.user, isPasswordDefault: false };
+          setAuthState(prevState => ({ ...prevState, user: updatedUser, isLoading: false }));
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        } else {
+          setAuthState(prevState => ({ ...prevState, isLoading: false }));
+        }
+        return true;
+      } else {
+        toast.error(response.data?.message || 'Password update failed. Please try again.');
+        setAuthState(prevState => ({ ...prevState, isLoading: false }));
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Update password error:', error);
+      const errorMessage = error.response?.data?.message || 'Password update failed. An unexpected error occurred.';
+      toast.error(errorMessage);
+      setAuthState(prevState => ({ ...prevState, isLoading: false }));
+      return false;
+    }
+  };
+
+  const register = async (userData: UserCreationRequest): Promise<boolean> => {
+    setAuthState(prevState => ({ ...prevState, isLoading: true }));
+    try {
+      // The backend expects fields like firstName, lastName, etc.
+      // Ensure UserCreationRequest matches the backend API contract for /api/auth/register
+      const response = await apiClient.post('/auth/register', userData);
+
+      if (response.status === 201 && response.data) {
+        // Backend sends back user object and token upon successful registration
+        // For this basic version, we will not automatically log the user in.
+        // We'll just show a success message.
+        toast.success('Registration successful! Please log in.');
+        // Optionally, you could store the new user in 'allUsers' if still using it for some listings,
+        // but primary user management should move to backend calls.
+        // Example: setAllUsers(prevUsers => ({ ...prevUsers, [response.data.email]: { user: response.data, password: '' } }));
+        return true;
+      } else {
+        toast.error(response.data?.message || 'Registration failed. Please try again.');
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      const errorMessage = error.response?.data?.message || 'Registration failed. An unexpected error occurred.';
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      setAuthState(prevState => ({ ...prevState, isLoading: false }));
+    }
   };
 
   const logout = () => {
-    // Clear user from localStorage
+    // Clear user and token from localStorage
     localStorage.removeItem("user");
+    localStorage.removeItem("token"); // Added this line
     
     // Update state
     setAuthState({
@@ -118,6 +265,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: false,
       isLoading: false,
     });
+    toast.info("You have been logged out."); // Optional: Add a toast message
   };
 
   const updateProfile = (user: User) => {
@@ -170,7 +318,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{ 
         authState, 
         login, 
-        logout, 
+        logout,
+        register, // Added register function
         updateProfile, 
         createUser,
         getAllUsers,
@@ -178,7 +327,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         getUsersByRole,
         departments,
         updateUserProfile,
-        addDepartment
+        addDepartment,
+        updatePassword // Added updatePassword function
       }}
     >
       {children}
