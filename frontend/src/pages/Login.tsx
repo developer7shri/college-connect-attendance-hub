@@ -27,11 +27,27 @@ const Login: React.FC = () => {
     try {
       const success = await login(username, password);
       
-      if (success) {
-        toast.success("Login successful");
-        // Navigation will be handled by the ProtectedRoute component
-      } else {
-        toast.error("Invalid username or password");
+      if (success && authState.user) { // Check authState.user here
+        toast.success("Login successful. Redirecting...");
+        switch (authState.user.role) {
+          case "Admin":
+            navigate("/admin/dashboard", { replace: true });
+            break;
+          case "HOD":
+            navigate("/hod/dashboard", { replace: true });
+            break;
+          case "Teacher":
+            navigate("/teacher/dashboard", { replace: true });
+            break;
+          case "Student":
+            navigate("/student/dashboard", { replace: true });
+            break;
+          default:
+            navigate("/dashboard", { replace: true }); // Fallback
+            break;
+        }
+      } else if (!success) { // Only handle !success if authState.user was not the issue
+        toast.error("Invalid username or password"); // This might be redundant if login() already toasts
       }
     } catch (error) {
       toast.error("An error occurred during login");
@@ -45,16 +61,16 @@ const Login: React.FC = () => {
   if (authState.isAuthenticated && authState.user) {
     // Redirect based on user role
     switch (authState.user.role) {
-      case "admin":
+      case "Admin": // Capitalized
         return <Navigate to="/admin/dashboard" replace />;
-      case "hod":
+      case "HOD": // Capitalized
         return <Navigate to="/hod/dashboard" replace />;
-      case "teacher":
+      case "Teacher": // Capitalized
         return <Navigate to="/teacher/dashboard" replace />;
-      case "student":
+      case "Student": // Capitalized
         return <Navigate to="/student/dashboard" replace />;
       default:
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to="/dashboard" replace />; // Fallback
     }
   }
 
