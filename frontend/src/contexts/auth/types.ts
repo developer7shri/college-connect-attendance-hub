@@ -11,7 +11,7 @@ export interface AuthState {
 // Auth context interface
 export interface AuthContextType {
   authState: AuthState;
-  login: (email: string, password: string) => Promise<boolean>; // Changed username to email
+  login: (email: string, password: string) => Promise<User | null>; // Updated return type
   logout: () => void;
   register: (userData: UserCreationRequest) => Promise<boolean>; // Added register method
   updateProfile: (user: User) => void;

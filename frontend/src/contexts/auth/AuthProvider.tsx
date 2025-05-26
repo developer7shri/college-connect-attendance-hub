@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [authState.isAuthenticated, authState.user?.role, setAllUsers]);
 
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<User | null> => { // Updated return type
     setAuthState(prevState => ({ ...prevState, isLoading: true }));
     try {
       const response = await apiClient.post('/auth/login', { email, password });
@@ -162,14 +162,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isLoading: false,
         });
         toast.success('Login successful!');
-        return true;
+        return frontendUser; // Return the mapped user object
       } else {
         // Handle cases where response might not be as expected
         toast.error('Login failed: Invalid response from server.');
         setAuthState({ user: null, isAuthenticated: false, isLoading: false });
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        return false;
+        return null; // Updated return value
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -178,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthState({ user: null, isAuthenticated: false, isLoading: false });
       localStorage.removeItem('token'); // Clear token on failed login
       localStorage.removeItem('user');  // Clear user data on failed login
-      return false;
+      return null; // Updated return value
     } finally {
       setAuthState(prevState => ({ ...prevState, isLoading: false }));
     }

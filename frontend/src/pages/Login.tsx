@@ -25,11 +25,11 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(username, password);
+      const loggedInUser = await login(username, password); // `username` is the email input
       
-      if (success && authState.user) { // Check authState.user here
-        toast.success("Login successful. Redirecting...");
-        switch (authState.user.role) {
+      if (loggedInUser) { // If login was successful and we got a user object
+        toast.info("Redirecting to your dashboard..."); // Changed from success to info for variation
+        switch (loggedInUser.role) {
           case "Admin":
             navigate("/admin/dashboard", { replace: true });
             break;
@@ -46,12 +46,13 @@ const Login: React.FC = () => {
             navigate("/dashboard", { replace: true }); // Fallback
             break;
         }
-      } else if (!success) { // Only handle !success if authState.user was not the issue
-        toast.error("Invalid username or password"); // This might be redundant if login() already toasts
+      } else {
+        // Login failed. AuthProvider's login function should have handled
+        // error toasts and state reset. No specific error toast needed here.
       }
-    } catch (error) {
-      toast.error("An error occurred during login");
-      console.error(error);
+    } catch (error) { // This catch is for unexpected errors during the login() call itself
+      toast.error("An unexpected error occurred during the login process.");
+      console.error("Login page handleSubmit error:", error);
     } finally {
       setIsLoading(false);
     }
