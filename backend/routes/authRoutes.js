@@ -5,12 +5,12 @@ const {
   loginUser,
   updatePassword,
 } = require('../controllers/authController');
-// const { protect } = require('../middleware/authMiddleware'); // Will be added later
+const { protect, authorize } = require('../middleware/authMiddleware'); // Updated import
 
 // @route   POST /api/auth/register
-// @desc    Register a new user
-// @access  Public
-router.post('/register', registerUser);
+// @desc    Register a new user (Admin only)
+// @access  Private/Admin
+router.post('/register', protect, authorize('Admin'), registerUser); // Secured route
 
 // @route   POST /api/auth/login
 // @desc    Authenticate user & get token
@@ -21,7 +21,6 @@ router.post('/login', loginUser);
 // @desc    Update user password
 // @access  Private (will require auth middleware)
 // For now, it's not protected. Add 'protect' middleware once it's created.
-// Example: router.put('/update-password', protect, updatePassword);
-router.put('/update-password', updatePassword); // Placeholder for when req.user is not available
+router.put('/update-password', protect, updatePassword);
 
 module.exports = router;

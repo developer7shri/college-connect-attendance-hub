@@ -1,19 +1,24 @@
 // User roles
-export type UserRole = 'admin' | 'hod' | 'teacher' | 'student';
+export type UserRole = 'Admin' | 'HOD' | 'Teacher' | 'Student'; // Capitalized to match backend
 
 // User interface
 export interface User {
-  id: string;
-  name: string;
+  id: string; // Was _id from backend
   email: string;
   role: UserRole;
+  name: string; // Was firstName + lastName
+  firstName?: string; // Keep if still used directly
+  lastName?: string;  // Keep if still used directly
+  phone?: string;     // Was phoneNumber
   department?: string;
+  semester?: number; // Consistent as number
+  usn?: string;
   profileImageUrl?: string;
-  phone?: string;
   subjects?: Subject[]; // Array of subjects for teachers
   classes?: string[]; // Array of class/semester identifiers for teachers
-  usn?: string; // USN for students
-  semester?: number;
+  isPasswordDefault: boolean; // Added this line
+  createdAt?: string; // Or Date
+  updatedAt?: string; // Or Date
 }
 
 // Subject interface
@@ -95,14 +100,14 @@ export interface QRCodeData {
 
 // User Creation Request
 export interface UserCreationRequest {
-  name: string;
-  email: string; // This will be used as the user ID
-  phone: string; // This will be used as the initial password
-  department: string;
+  email: string;
+  password: string; // Password is required for self-registration
   role: UserRole;
-  semester?: number;
-  subjects?: Subject[]; // For teachers - multiple subjects
-  classes?: string[]; // For teachers - multiple classes/semesters
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  department?: string;
+  semester?: number; // Consistent with User type
   usn?: string;
 }
 

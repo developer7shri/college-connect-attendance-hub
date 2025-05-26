@@ -11,8 +11,9 @@ export interface AuthState {
 // Auth context interface
 export interface AuthContextType {
   authState: AuthState;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>; // Changed username to email
   logout: () => void;
+  register: (userData: UserCreationRequest) => Promise<boolean>; // Added register method
   updateProfile: (user: User) => void;
   updateUserProfile: (user: User) => void; 
   createUser: (userRequest: UserCreationRequest) => GeneratedCredentials | null;
@@ -21,6 +22,13 @@ export interface AuthContextType {
   getUsersByRole: (role: UserRole) => User[];
   departments: string[];
   addDepartment: (name: string) => void;
+  updatePassword: (data: UpdatePasswordData) => Promise<boolean>; // Added updatePassword
+}
+
+// Interface for password update data
+export interface UpdatePasswordData {
+  oldPassword: string;
+  newPassword: string;
 }
 
 // User data structure for storage

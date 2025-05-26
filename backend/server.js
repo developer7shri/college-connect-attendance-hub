@@ -1,13 +1,28 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors'); // Import cors
 
 // Load env vars
 dotenv.config();
 
 const app = express();
 
+// Enable CORS - BEFORE YOUR ROUTES
+app.use(cors({
+  origin: 'http://localhost:8080', // Allow your frontend origin
+  credentials: true // If you need to send cookies or authorization headers
+}));
+
 // Init Middleware
 app.use(express.json());
+
+// app.get('/', (req, res) => res.send('SCAHTS API Running')); // Original simple route
+// It's better to have this after CORS if it's a testable endpoint,
+// but for a simple "API Running" message, its position is less critical.
+// However, general practice is to define middlewares before routes.
+// The main app.get('/') can be considered a route.
+// For this task, I will ensure CORS is before actual API routes.
+// The line `app.use(express.json());` is fine where it is.
 
 app.get('/', (req, res) => res.send('SCAHTS API Running'));
 
