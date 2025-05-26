@@ -82,37 +82,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // useEffect to fetch all users if current user is Admin
+  // useEffect to manage loading user lists (all users for Admin, DUMMY_USERS for others)
   useEffect(() => {
-    const loadUsersForAdmin = async () => {
-      if (authState.user && authState.isAuthenticated && authState.user.role === 'Admin') {
-        setAuthState(prevState => ({ ...prevState, isLoading: true }));
-        try {
-          const response = await apiClient.get<User[]>('/admin/users');
-          const usersRecord = Object.fromEntries(
-            response.data.map(u => [u.email, { user: u }]) // password field is omitted as it's not sent by API
-          );
-          setAllUsers(usersRecord); // Update the shared user list
-          // localStorage.setItem("allUsers", JSON.stringify(usersRecord)); // Persist admin-fetched users
-          toast.success("All users loaded for Admin.");
-        } catch (error: any) {
-          console.error("Error fetching all users for admin:", error);
-          toast.error(error.response?.data?.message || "Failed to fetch users for admin.");
-        } finally {
-          setAuthState(prevState => ({ ...prevState, isLoading: false }));
+    const loadUserData = async () => {
+      // This condition handles authenticated users
+      if (authState.isAuthenticated && authState.user) {
+        if (authState.user.role === 'Admin') {
+          // Current user is Admin: Fetch all users from API
+          setAuthState(prevState => ({ ...prevState, isLoading: true }));
+          try {
+            const response = await apiClient.get<User[]>('/admin/users');
+            const usersRecord = Object.fromEntries(
+              response.data.map(u => [u.email, { user: u }])
+            );
+            setAllUsers(usersRecord); // This comes from useUserManagement
+            toast.success("All users loaded for Admin.");
+          } catch (error: any) {
+            console.error("Error fetching all users for admin:", error);
+            toast.error(error.response?.data?.message || "Failed to fetch users for admin.");
+            // Optionally, if admin user fetch fails, revert to DUMMY_USERS or an empty set
+            // setAllUsers(DUMMY_USERS); 
+          } finally {
+            setAuthState(prevState => ({ ...prevState, isLoading: false }));
+          }
+        } else {
+          // Current user is authenticated but not an Admin: load DUMMY_USERS
+          setAllUsers(DUMMY_USERS);
         }
-      } else if (!authState.isAuthenticated || (authState.user && authState.user.role !== 'Admin')) {
-        // If user logs out or is not an admin, revert to DUMMY_USERS.
-        // DUMMY_USERS from mockData.ts is already in the correct format Record<string, { user: User, password?: string}>
-        setAllUsers(DUMMY_USERS); 
-        // The localStorage persistence will be handled by the useUserManagement hook when setAllUsers is called.
+      } else if (authState.isAuthenticated === false) { 
+        // Current user is explicitly logged out (isAuthenticated is false, not null)
+        // Load DUMMY_USERS upon logout.
+        setAllUsers(DUMMY_USERS);
       }
+      // If authState.isAuthenticated is null (initial loading state), do nothing here,
+      // let the initial useEffect that loads from localStorage handle the very first load.
     };
 
-    if (authState.isAuthenticated !== null) { // Ensure initial auth check is done
-        loadUsersForAdmin();
+    // Only run loadUserData if isAuthenticated is determined (true or false, but not null)
+    if (authState.isAuthenticated !== null) {
+      loadUserData();
     }
-  }, [authState.user, authState.isAuthenticated, setAllUsers]);
+    // Update dependency array
+  }, [authState.isAuthenticated, authState.user?.role, setAllUsers]);
 
 
   const login = async (email: string, password: string): Promise<boolean> => {

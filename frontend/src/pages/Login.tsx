@@ -57,22 +57,8 @@ const Login: React.FC = () => {
     }
   };
 
-  // Redirect if already authenticated
-  if (authState.isAuthenticated && authState.user) {
-    // Redirect based on user role
-    switch (authState.user.role) {
-      case "Admin": // Capitalized
-        return <Navigate to="/admin/dashboard" replace />;
-      case "HOD": // Capitalized
-        return <Navigate to="/hod/dashboard" replace />;
-      case "Teacher": // Capitalized
-        return <Navigate to="/teacher/dashboard" replace />;
-      case "Student": // Capitalized
-        return <Navigate to="/student/dashboard" replace />;
-      default:
-        return <Navigate to="/dashboard" replace />; // Fallback
-    }
-  }
+  // The declarative redirect block for already authenticated users has been removed.
+  // Navigation for authenticated users trying to access /login will be handled by App.tsx or MainLayout.
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
