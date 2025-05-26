@@ -135,33 +135,7 @@ const Login: React.FC = () => {
           </form>
         </Card>
 
-        <div className="mt-4 text-center text-sm">
-          <div className="text-gray-500">
-            Demo accounts:
-          </div>
-          <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-            <div className="bg-gray-100 p-2 rounded">
-              <div className="font-bold">Admin</div>
-              <div>Username: admin</div>
-              <div>Password: admin123</div>
-            </div>
-            <div className="bg-gray-100 p-2 rounded">
-              <div className="font-bold">HOD</div>
-              <div>Username: hod123</div>
-              <div>Password: hod123</div>
-            </div>
-            <div className="bg-gray-100 p-2 rounded">
-              <div className="font-bold">Teacher</div>
-              <div>Username: teacher</div>
-              <div>Password: teacher123</div>
-            </div>
-            <div className="bg-gray-100 p-2 rounded">
-              <div className="font-bold">Student</div>
-              <div>Username: CS001</div>
-              <div>Password: CS001</div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

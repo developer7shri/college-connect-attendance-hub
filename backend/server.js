@@ -9,7 +9,7 @@ const app = express();
 
 // Enable CORS - BEFORE YOUR ROUTES
 app.use(cors({
-  origin: 'http://localhost:8080', // Allow your frontend origin
+  origin: 'http://localhost:3000', // Allow your frontend origin
   credentials: true // If you need to send cookies or authorization headers
 }));
 
