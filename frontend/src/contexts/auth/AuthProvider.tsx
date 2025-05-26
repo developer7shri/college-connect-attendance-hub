@@ -102,15 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setAuthState(prevState => ({ ...prevState, isLoading: false }));
         }
       } else if (!authState.isAuthenticated || (authState.user && authState.user.role !== 'Admin')) {
-        // If user logs out or is not an admin, revert to DUMMY_USERS
-        // DUMMY_USERS is an array of User objects.
-        // DUMMY_PASSWORDS is a Record<string, string> (email -> password)
-        // The state 'allUsers' from useUserManagement is Record<string, { user: User; password?: string }>
-        const dummyUsersRecord = Object.fromEntries(
-          DUMMY_USERS.map(u => [u.email, { user: u, password: DUMMY_PASSWORDS[u.email] }])
-        );
-        setAllUsers(dummyUsersRecord);
-        // localStorage.setItem("allUsers", JSON.stringify(dummyUsersRecord)); // Persist dummy users
+        // If user logs out or is not an admin, revert to DUMMY_USERS.
+        // DUMMY_USERS from mockData.ts is already in the correct format Record<string, { user: User, password?: string}>
+        setAllUsers(DUMMY_USERS); 
+        // The localStorage persistence will be handled by the useUserManagement hook when setAllUsers is called.
       }
     };
 

@@ -130,23 +130,37 @@ const registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
+  console.log('DEBUG: loginUser controller invoked.'); // General invocation log
   const { email, password } = req.body;
+  console.log(`DEBUG: Attempting login for email: [${email}]`); // Log email
+  // Avoid logging the raw password directly in production, but for temporary debugging:
+  console.log(`DEBUG: Password received (first 3 chars): [${password ? password.substring(0, 3) : 'N/A'}...]`);
+
 
   try {
     // Check for user by email
-    const user = await User.findOne({ email }).select('+password'); // Explicitly select password
+    console.log(`DEBUG: Searching for user with email: [${email}]`);
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password'); // Ensure email is lowercased for query, as it's stored as lowercase.
 
     if (!user) {
+      console.log(`DEBUG: User not found for email: [${email.toLowerCase()}]`);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+
+    console.log(`DEBUG: User found: ID [${user._id}], Email [${user.email}], Role [${user.role}]`);
+    // Do NOT log user.password here as it's the hash.
 
     // Check if password matches
+    console.log(`DEBUG: About to call user.matchPassword() for user ID [${user._id}]`);
     const isMatch = await user.matchPassword(password);
+    console.log(`DEBUG: Result of user.matchPassword(): [${isMatch}]`);
 
     if (!isMatch) {
+      console.log(`DEBUG: Password mismatch for user ID [${user._id}]`);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    console.log(`DEBUG: Login successful for user ID [${user._id}]. Generating token...`);
     // Respond with user details and token (excluding password)
     const userResponse = {
       _id: user._id,
@@ -168,7 +182,8 @@ const loginUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    console.error(error.message);
+    console.error('DEBUG: Error during loginUser process:', error); // Log the full error
+    // console.error(error.message); // This was already here
     res.status(500).send('Server error');
   }
 };
