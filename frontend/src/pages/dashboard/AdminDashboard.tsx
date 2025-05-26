@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,9 +29,9 @@ const AdminDashboard: React.FC = () => {
   // This would be fetched from API in a real application
   const dashboardStats = {
     totalDepartments: departments.length,
-    totalTeachers: getUsersByRole("teacher").length,
-    totalStudents: getUsersByRole("student").length,
-    totalHODs: getUsersByRole("hod").length,
+    totalTeachers: getUsersByRole("Teacher").length,
+    totalStudents: getUsersByRole("Student").length,
+    totalHODs: getUsersByRole("HOD").length,
     pendingApprovals: 8,
   };
 
@@ -79,7 +78,7 @@ const AdminDashboard: React.FC = () => {
     toast.success(`HOD ${data.name} has been updated successfully`);
   };
 
-  const hods = getUsersByRole("hod");
+  const hods = getUsersByRole("HOD");
 
   return (
     <div className="space-y-6">

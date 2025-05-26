@@ -11,8 +11,8 @@ const HODDashboard: React.FC = () => {
 
   // This would be fetched from API in a real application
   const dashboardStats = {
-    totalTeachers: getUsersByDepartment(authState.user?.department || "").filter(u => u.role === "teacher").length,
-    totalStudents: getUsersByDepartment(authState.user?.department || "").filter(u => u.role === "student").length,
+    totalTeachers: getUsersByDepartment(authState.user?.department || "").filter(u => u.role === "Teacher").length,
+    totalStudents: getUsersByDepartment(authState.user?.department || "").filter(u => u.role === "Student").length,
     teachersPresent: 10,
     teachersAbsent: 2,
     pendingLeaves: 5,

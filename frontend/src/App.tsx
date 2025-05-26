@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -59,7 +58,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/login" replace />} />
             
             {/* Admin Routes */}
-            <Route path="/admin" element={<MainLayout allowedRoles={["admin"]} />}>
+            <Route path="/admin" element={<MainLayout allowedRoles={["Admin"]} />}>
               <Route path="" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="departments" element={<Departments />} />
@@ -74,7 +73,7 @@ const App = () => (
             </Route>
             
             {/* HOD Routes */}
-            <Route path="/hod" element={<MainLayout allowedRoles={["hod"]} />}>
+            <Route path="/hod" element={<MainLayout allowedRoles={["HOD"]} />}>
               <Route path="" element={<Navigate to="/hod/dashboard" replace />} />
               <Route path="dashboard" element={<HODDashboard />} />
               <Route path="teachers" element={<Teachers />} />
@@ -87,7 +86,7 @@ const App = () => (
             </Route>
             
             {/* Teacher Routes */}
-            <Route path="/teacher" element={<MainLayout allowedRoles={["teacher"]} />}>
+            <Route path="/teacher" element={<MainLayout allowedRoles={["Teacher"]} />}>
               <Route path="" element={<Navigate to="/teacher/dashboard" replace />} />
               <Route path="dashboard" element={<TeacherDashboard />} />
               <Route path="qr-generator" element={<QRGenerator />} />
@@ -100,7 +99,7 @@ const App = () => (
             </Route>
             
             {/* Student Routes */}
-            <Route path="/student" element={<MainLayout allowedRoles={["student"]} />}>
+            <Route path="/student" element={<MainLayout allowedRoles={["Student"]} />}>
               <Route path="" element={<Navigate to="/student/dashboard" replace />} />
               <Route path="dashboard" element={<StudentDashboard />} />
               <Route path="qr-scanner" element={<QRScanner />} />

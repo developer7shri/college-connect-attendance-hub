@@ -1,4 +1,3 @@
-
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -30,79 +29,79 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: Home,
-    roles: ["admin", "hod", "teacher", "student"],
+    roles: ["Admin", "HOD", "Teacher", "Student"],
   },
   {
     label: "Departments",
     href: "/departments",
     icon: BookOpen,
-    roles: ["admin"],
+    roles: ["Admin"],
   },
   {
     label: "Notification System",
     href: "/notifications",
     icon: Bell,
-    roles: ["admin"],
+    roles: ["Admin"],
   },
   {
     label: "Study Material",
     href: "/study-material",
     icon: FileText,
-    roles: ["admin"],
+    roles: ["Admin"],
   },
   {
     label: "Teachers",
     href: "/teachers",
     icon: Users,
-    roles: ["admin", "hod"],
+    roles: ["Admin", "HOD"],
   },
   {
     label: "Students",
     href: "/students",
     icon: Users,
-    roles: ["admin", "hod", "teacher"],
+    roles: ["Admin", "HOD", "Teacher"],
   },
   {
     label: "Attendance",
     href: "/attendance",
     icon: CheckSquare,
-    roles: ["admin", "hod", "teacher", "student"],
+    roles: ["Admin", "HOD", "Teacher", "Student"],
   },
   {
     label: "QR Scanner",
     href: "/student/qr-scanner",
     icon: QrCode,
-    roles: ["student"],
+    roles: ["Student"],
   },
   {
     label: "QR Generator",
     href: "/teacher/qr-generator",
     icon: QrCode,
-    roles: ["teacher"],
+    roles: ["Teacher"],
   },
   {
     label: "Mentoring",
     href: "/mentoring",
     icon: User,
-    roles: ["hod", "teacher", "student"],
+    roles: ["HOD", "Teacher", "Student"],
   },
   {
     label: "Leave Management",
     href: "/leave",
     icon: Calendar,
-    roles: ["hod", "teacher", "student"],
+    roles: ["HOD", "Teacher", "Student"],
   },
   {
     label: "Profile",
     href: "/profile",
     icon: UserCircle,
-    roles: ["admin", "hod", "teacher", "student"],
+    roles: ["Admin", "HOD", "Teacher", "Student"],
   },
   {
     label: "Settings",
     href: "/settings",
     icon: Settings,
-    roles: ["admin", "hod", "teacher", "student"],
+    roles: ["Admin", "HOD", "Teacher", "Student"],
   },
 ];
 
@@ -124,10 +123,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigation }) => {
   // Get the base route for the current user role
   const getRoleBasePath = () => {
     switch (user.role) {
-      case "admin": return "/admin";
-      case "hod": return "/hod";
-      case "teacher": return "/teacher";
-      case "student": return "/student";
+      case "Admin": return "/admin";
+      case "HOD": return "/hod";
+      case "Teacher": return "/teacher";
+      case "Student": return "/student";
       default: return "";
     }
   };

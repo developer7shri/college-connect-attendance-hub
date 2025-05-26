@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -75,11 +74,13 @@ const AddHODDialog: React.FC<AddHODDialogProps> = ({
 
   const handleSubmit = (data: HODFormValues) => {
     const credentials = createUser({
-      name: data.name,
+      firstName: data.name.split(' ')[0] || data.name,
+      lastName: data.name.split(' ').slice(1).join(' ') || '',
       email: data.email,
       department: data.department,
-      phone: data.phone,
-      role: "hod"
+      phoneNumber: data.phone,
+      password: data.phone,
+      role: "HOD"
     });
     
     if (credentials) {

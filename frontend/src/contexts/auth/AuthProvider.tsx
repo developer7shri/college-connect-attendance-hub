@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthState, User, UserRole, GeneratedCredentials, UserCreationRequest } from "@/types";
 import { toast } from "sonner";
@@ -286,9 +285,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateUserProfile(user);
   };
 
-  // Wrapper for the createUser function to pass the current user
-  const createUser = (userRequest: UserCreationRequest): GeneratedCredentials | null => {
-    return createUserInternal(userRequest, authState.user);
+  // Wrapper for the createUser function to always use the backend API
+  const createUser = async (userRequest: UserCreationRequest): Promise<GeneratedCredentials | null> => {
+    try {
+      const response = await apiClient.post('/auth/register', userRequest);
+      toast.success('User created successfully!');
+      // Optionally, you can return more info from response.data if needed
+      return {
+        username: userRequest.email,
+        password: userRequest.password,
+        name: `${userRequest.firstName} ${userRequest.lastName}`,
+        email: userRequest.email,
+        role: userRequest.role,
+      };
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to create user');
+      return null;
+    }
   };
 
   // Wrapper for updateUserProfile to pass current user
@@ -327,7 +340,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         register, // Added register function
         updateProfile, 
-        createUser,
+        createUser, // Now always uses backend
         getAllUsers,
         getUsersByDepartment,
         getUsersByRole,

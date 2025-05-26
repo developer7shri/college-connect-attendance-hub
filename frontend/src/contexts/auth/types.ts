@@ -1,4 +1,3 @@
-
 import { User, UserRole, GeneratedCredentials, UserCreationRequest } from "@/types";
 
 // Auth state interface
@@ -16,7 +15,7 @@ export interface AuthContextType {
   register: (userData: UserCreationRequest) => Promise<boolean>; // Added register method
   updateProfile: (user: User) => void;
   updateUserProfile: (user: User) => void; 
-  createUser: (userRequest: UserCreationRequest) => GeneratedCredentials | null;
+  createUser: (userRequest: UserCreationRequest) => Promise<GeneratedCredentials | null>; // Made async
   getAllUsers: () => User[];
   getUsersByDepartment: (department: string) => User[];
   getUsersByRole: (role: UserRole) => User[];
